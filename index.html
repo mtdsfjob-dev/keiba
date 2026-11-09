@@ -94,7 +94,7 @@ details.c.top{background:#1b2310;border-color:#4a5c10}
 .bt{background:#232a35;border:none;height:10px;border-radius:99px}
 .wk{border-color:#3a4352}.um{background:#10151c;color:var(--fg);border-color:#3a4352}
 table{color:var(--fg)}
-.btm{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;background:rgba(12,14,18,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #262d3a;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+html{min-height:100%;height:-webkit-fill-available}body{min-height:100vh;min-height:100dvh;min-height:-webkit-fill-available}.btm{position:fixed;left:0;right:0;bottom:0;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);z-index:50;display:flex;background:rgba(12,14,18,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #262d3a;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
 .bi{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:none;color:#8f98a8;font:inherit;font-size:11px;font-weight:900;padding:5px 0;min-height:44px;cursor:pointer}
 .bi i{font-style:normal;font-size:20px;line-height:1.1;filter:grayscale(1) brightness(1.4)}
 .bi[aria-pressed="true"]{color:var(--lime)}.bi[aria-pressed="true"] i{filter:none}
