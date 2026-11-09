@@ -94,7 +94,7 @@ details.c.top{background:#1b2310;border-color:#4a5c10}
 .bt{background:#232a35;border:none;height:10px;border-radius:99px}
 .wk{border-color:#3a4352}.um{background:#10151c;color:var(--fg);border-color:#3a4352}
 table{color:var(--fg)}
-html{min-height:100%;height:-webkit-fill-available}body{min-height:100vh;min-height:100dvh;min-height:-webkit-fill-available}.btm{position:fixed;left:0;right:0;bottom:0;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);z-index:50;display:flex;background:rgba(12,14,18,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #262d3a;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+html{height:100%;overflow:hidden}body{height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:none}.btm{position:fixed;left:0;right:0;bottom:0;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);z-index:50;display:flex;background:rgba(12,14,18,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #262d3a;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
 .bi{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:none;color:#8f98a8;font:inherit;font-size:11px;font-weight:900;padding:5px 0;min-height:44px;cursor:pointer}
 .bi i{font-style:normal;font-size:20px;line-height:1.1;filter:grayscale(1) brightness(1.4)}
 .bi[aria-pressed="true"]{color:var(--lime)}.bi[aria-pressed="true"] i{filter:none}
@@ -588,10 +588,10 @@ function loadOdds(){
 document.addEventListener('click',function(e){var b=e.target.closest('.sb .tab');if(!b)return;S.sort=b.dataset.sort;resort();});
 function firstPlace(d){return '全レース';}
 document.getElementById('nd').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;S.day=b.dataset.day;S.place=firstPlace(S.day);S.race='ov';show();});
-document.getElementById('bt').addEventListener('click',function(e){var b=e.target.closest('.bi');if(!b)return;var p=b.dataset.p;if(p==='場'){var v=$all('#np .tab').filter(function(t){return t.dataset.day===S.day&&['推奨','全レース','結果'].indexOf(t.dataset.place)<0;})[0];if(!v)return;p=v.dataset.place;}S.place=p;S.race='ov';show();window.scrollTo(0,0);});
+document.getElementById('bt').addEventListener('click',function(e){var b=e.target.closest('.bi');if(!b)return;var p=b.dataset.p;if(p==='場'){var v=$all('#np .tab').filter(function(t){return t.dataset.day===S.day&&['推奨','全レース','結果'].indexOf(t.dataset.place)<0;})[0];if(!v)return;p=v.dataset.place;}S.place=p;S.race='ov';show();document.body.scrollTop=0;});
 document.getElementById('np').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;S.place=b.dataset.place;S.race='ov';show();});
-document.getElementById('nr').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;S.race=b.dataset.race;show();window.scrollTo(0,0);});
-document.addEventListener('click',function(e){var t=e.target.closest('[data-go]');if(!t)return;if(t.dataset.goplace)S.place=t.dataset.goplace;S.race=t.dataset.go;show();window.scrollTo(0,0);});
+document.getElementById('nr').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;S.race=b.dataset.race;show();document.body.scrollTop=0;});
+document.addEventListener('click',function(e){var t=e.target.closest('[data-go]');if(!t)return;if(t.dataset.goplace)S.place=t.dataset.goplace;S.race=t.dataset.go;show();document.body.scrollTop=0;});
 var days=$all('#nd .tab'),td=today(),pick=days[0];
 days.forEach(function(b){if(b.dataset.day===td)pick=b;});
 S.day=pick.dataset.day;S.place=firstPlace(S.day);show();resort();applyOdds();
