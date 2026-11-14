@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>はじめての方へ | ステータスチェッカーv1</title>
+<style>
+:root{--bg:#0b0b0c;--card:#17181a;--line:#2c2d30;--fg:#f3f3f3;--mut:#a8a8ad;--lime:#c6ff00;--pink:#ff5c9a;--blue:#8fa2ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;line-height:1.75;font-size:16px;-webkit-text-size-adjust:100%}
+main{max-width:680px;margin:0 auto;padding:20px 16px 80px}
+a{color:var(--lime)}
+h1{font-size:24px;line-height:1.35;margin:8px 0 4px}
+h2{font-size:19px;margin:38px 0 10px;padding:6px 14px;background:var(--lime);color:#000;border-radius:99px;display:inline-block}
+h3{font-size:16px;margin:20px 0 6px;color:var(--lime)}
+p{margin:8px 0}
+.lead{color:var(--mut);margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:12px 0}
+.big{font-size:18px;font-weight:700}
+.mut{color:var(--mut);font-size:14px}
+ol,ul{padding-left:1.3em;margin:8px 0}
+li{margin:5px 0}
+.step{display:flex;gap:12px;align-items:flex-start;margin:10px 0}
+.num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--lime);color:#000;font-weight:800;display:flex;align-items:center;justify-content:center}
+.arrow{text-align:center;color:var(--mut);margin:-2px 0}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:13px}
+td.r{text-align:right;white-space:nowrap}
+.tag{display:inline-block;padding:1px 10px;border-radius:99px;font-size:13px;font-weight:700;border:1px solid var(--line)}
+.t-are{color:var(--pink);border-color:var(--pink)}.t-kata{color:var(--blue);border-color:var(--blue)}.t-fu{color:var(--mut)}
+.warn{border-color:var(--pink)}
+.warn b{color:var(--pink)}
+.toc a{display:block;padding:7px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.back{display:inline-block;margin:6px 0 0;padding:8px 16px;border:1px solid var(--lime);border-radius:99px;text-decoration:none;font-weight:700}
+dt{font-weight:700;margin-top:12px;color:var(--lime)}
+dd{margin:2px 0 0}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./">← アプリに戻る</a>
+<h1>はじめての方へ<br>このアプリの仕組み</h1>
+<p class="lead">中央競馬(JRA)の、その日の全レースを採点して、「買うレース」と「買い目・金額」を出すアプリです。読むのに5分ほどです。</p>
+
+<div class="card">
+<p class="big">ひとことで言うと</p>
+<ol>
+<li>全部の馬に点数を付ける。</li>
+<li>レースを「荒れる・ふつう・固い」に分ける。</li>
+<li>条件に合ったレースだけ、ワイドと三連複の買い目を出す。</li>
+<li>その日の収支がプラスになったら、そこで終わる。</li>
+</ol>
+<p class="mut">目標は「年間でプラス」ではなく「その日をプラスで終える」ことです。</p>
+</div>
+
+<div class="card toc">
+<a href="#yosou">1. 予想の仕組み(馬の点数はどう決まるか)</a>
+<a href="#wake">2. レースの分け方(荒れる・ふつう・固い)</a>
+<a href="#kaime">3. 買い目の仕組み(何を・いくら買うか)</a>
+<a href="#ichinichi">4. 1日の進め方(予算と、やめる時)</a>
+<a href="#gamen">5. 画面の見方</a>
+<a href="#seiseki">6. 正直な成績と、まだ分かっていないこと</a>
+<a href="#kotoba">7. 言葉の意味</a>
+</div>
+
+<h2 id="yosou">1. 予想の仕組み</h2>
+<p>3つの材料を、順番に重ねます。</p>
+
+<div class="step"><div class="num">1</div><div>
+<b>オッズを見ない点数(100点満点)</b><br>
+JRAの公式データだけで付ける点数です。過去の成績、コースや距離との相性、騎手と調教師、今回の状態などを足し算します。人気は一切見ません。レースのページに出る六角形の図がこれです。
+</div></div>
+<div class="arrow">↓</div>
+<div class="step"><div class="num">2</div><div>
+<b>締め切りのオッズの先読み</b><br>
+競馬の払い戻しは、買った時ではなく、締め切り時点のオッズで決まります。早い時間のオッズは、締め切りまでに大きく動きます。そこで「今のオッズ」と「1の点数」から、締め切りのオッズを前もって見積もります。
+</div></div>
+<div class="arrow">↓</div>
+<div class="step"><div class="num">3</div><div>
+<b>各馬が来る確率</b><br>
+2で見積もった人気をもとにして、過去のレースから学んだ補正を掛け、「この馬が1着・2着・3着に来る確率」を出します。買い目はすべて、この確率から計算します。
+</div></div>
+
+<div class="card">
+<h3>先読みで分かること(推奨タブの「この日の見立て」)</h3>
+<ul>
+<li><b>締め切りの上位</b>: 締め切り時点で人気になると読んだ馬。かっこの中は「今の単勝 → 締め切りの読み」です。</li>
+<li><b>人気が落ちる読み</b>: 今は人気でも、締め切りまでに人気が落ちると読んだ馬。過去1年では、こういう馬の単勝は100円が51円にしかなっていません。軸に向かない馬です。</li>
+<li><b>これから売れる読み</b>: 今より人気になると読んだ馬。今見えている配当より安くなります。</li>
+</ul>
+</div>
+
+<h2 id="wake">2. レースの分け方</h2>
+<p>「いちばん来そうな三連複5組」で、そのレースが決まる確率を足します。その大きさで3つに分けます。</p>
+<table>
+<tr><th>呼び方</th><th>上位5組で決まる確率</th><th>どういうレースか</th></tr>
+<tr><td><span class="tag t-kata">固い</span></td><td>55%以上</td><td>人気どころで決まりやすい</td></tr>
+<tr><td><span class="tag t-fu">ふつう</span></td><td>その間</td><td>どちらとも言えない</td></tr>
+<tr><td><span class="tag t-are">荒れ</span></td><td>約24%未満</td><td>人気薄が絡みやすい</td></tr>
+</table>
+<p class="mut">推奨タブの一番上に「荒れるレースが多い日」「少ない日」と出るのは、この本数を過去1年のふつうの日と比べたものです。</p>
+
+<h2 id="kaime">3. 買い目の仕組み</h2>
+<p>買う馬券は2種類だけです。</p>
+
+<div class="card">
+<h3>ワイド(当てにいく馬券)</h3>
+<p>選んだ2頭が、2頭とも3着以内に来れば当たりです。</p>
+<ul>
+<li>1レースに使うのは<b>2,000円</b>まで。</li>
+<li><b>どの組が当たっても、買った額の3倍以上が戻る</b>ように、組ごとの金額を決めます。オッズの低い組には厚く、高い組には薄く置きます。</li>
+<li>その条件で「どれかが当たる見込み」が<b>30%以上</b>あるレースだけ買います。届かないレースは見送りです。</li>
+</ul>
+<p class="mut">例: ワイド1点 1,800円で、オッズが3.4倍なら、当たれば6,120円が戻ります。画面には「当たれば最低 6,120円」と出ます。</p>
+</div>
+
+<div class="card">
+<h3>三連複(大きく取りにいく馬券)</h3>
+<p>選んだ3頭が、順番に関係なく1〜3着を占めれば当たりです。めったに当たりませんが、当たれば大きく戻ります。</p>
+<ul>
+<li>買うのは<b>「荒れ」と判定したレースだけ</b>です。</li>
+<li>その中で、<b>こちらの見立てよりオッズが5割以上高く付いている組</b>だけを選びます。</li>
+<li>1組<b>100円</b>ずつ買います。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>買わないレース</h3>
+<ul>
+<li><b>新馬戦と、初出走の馬がいるレース</b>: 過去の成績が無く、点数が付けられないためです。</li>
+<li><b>上の条件に届かないレース</b>: 理由は各レースのページに1行で出ます。</li>
+</ul>
+</div>
+
+<h2 id="ichinichi">4. 1日の進め方</h2>
+<table>
+<tr><th>決まり</th><th>中身</th></tr>
+<tr><td>1日の予算</td><td>上限10,000円。これを超える買い目は出しません。</td></tr>
+<tr><td>大きなレース(G1)</td><td>別に5,000円を取っておきます。上の予算が余っていれば、最大10,000円まで。</td></tr>
+<tr><td>買う順番</td><td>発走時刻の早いレースから順に、条件に合ったものを買います。予算が無くなったら、その後のレースは買えません。</td></tr>
+<tr><td>買い目が決まる時</td><td><b>発走の10分前</b>。それまでは「予定」で、オッズに合わせて変わります。10分前を過ぎたら変わりません。</td></tr>
+<tr><td>やめる時</td><td>その日の収支が<b>プラスになったら終了</b>です。それ以降のレースは買いません。</td></tr>
+<tr><td>負けている時</td><td>取り返すために金額を増やすことはしません。</td></tr>
+</table>
+<p class="mut">画面の更新は、開催日の9時〜16時台に、5分おきに自動で行われます。</p>
+
+<h2 id="gamen">5. 画面の見方</h2>
+<div class="card">
+<h3>★ 推奨</h3>
+<ul>
+<li><b>この日の見立て</b>: 荒れるレースが多い日か少ない日か。「全レースの一覧を開く」で、全レースの先読みが発走時刻順に出ます。</li>
+<li><b>今日の状態</b>: ここまでの収支、残りの予算。</li>
+<li><b>丸の数字が付いたレース</b>: 今日買うレースです。数字は買う順番です。ワイドと三連複の点数と金額が出ます。押すと、組ごとの金額が開きます。</li>
+</ul>
+<h3>☰ レース</h3>
+<ul>
+<li>全レースが発走時刻順に並びます。買わないレースには、その理由が出ます。</li>
+<li>レースを開くと、馬ごとの点数と六角形が見られます。</li>
+</ul>
+<h3>記録・成績</h3>
+<ul>
+<li>終わったレースの答え合わせと、自分で付けた購入の記録です。</li>
+<li>購入の記録は、自分の端末の中だけに保存されます。他の人には見えません。</li>
+</ul>
+</div>
+
+<h2 id="seiseki">6. 正直な成績と、まだ分かっていないこと</h2>
+<div class="card warn">
+<p><b>毎日勝てる仕組みではありません。</b>過去の開催日に、この買い方を当てはめて数えた結果です(2025〜26年)。</p>
+<table>
+<tr><th>開催日100日のうち</th><th class="r">日数</th></tr>
+<tr><td>その日をプラスで終える日</td><td class="r">46日</td></tr>
+<tr><td>2,000円以上のプラスで終える日</td><td class="r">37日</td></tr>
+<tr><td>5,000円以上のマイナスで終える日</td><td class="r">25日</td></tr>
+</table>
+<ul>
+<li>半分以上の日は、負けて終わります。</li>
+<li>100円が104円になる計算ですが、三連複の大きな当たりに頼っています。それが無い日は負けます。</li>
+<li>2026年11月14日(土)は、推奨が1本も当たりませんでした。</li>
+</ul>
+</div>
+<div class="card">
+<h3>まだ確かめていないこと</h3>
+<ul>
+<li>上の数字は、締め切り時点のオッズで数えたものです。実際に買う「発走10分前」のオッズで数え直した検証は、まだありません。</li>
+<li>締め切りオッズの先読みは、2026年11月14日の夜に入れました。「見立てが締め切りと合う割合」は確かめました(前日夜の時点で77%。今のオッズをそのまま使うと51%)。ただし、<b>先読みを使って買った場合の収支は、まだ数えていません。</b></li>
+<li>前の日の夜や朝は、ワイドと三連複のオッズが高めに出ます。そのため、早い時間の「予定」は、実際より多めに出ます。</li>
+</ul>
+</div>
+
+<h2 id="kotoba">7. 言葉の意味</h2>
+<dl>
+<dt>単勝</dt><dd>1着になる馬を当てる馬券。このアプリでは買いませんが、人気の物差しとして使います。</dd>
+<dt>ワイド</dt><dd>選んだ2頭が、2頭とも3着以内に来れば当たり。</dd>
+<dt>三連複</dt><dd>選んだ3頭が、順番に関係なく1〜3着を占めれば当たり。</dd>
+<dt>オッズ</dt><dd>当たった時に、100円が何円になるかの倍率。締め切りまで動き続けます。</dd>
+<dt>締め切りの先読み</dt><dd>今のオッズと、オッズを見ない点数から、締め切り時点のオッズを見積もること。</dd>
+<dt>荒れ・固い</dt><dd>人気薄が絡みやすいレースが「荒れ」、人気どころで決まりやすいレースが「固い」。</dd>
+<dt>狙い目○位</dt><dd>その日の推奨レースの中での順位です。当たりやすさの順ではありません。</dd>
+<dt>初出走</dt><dd>レースに出るのが初めての馬。過去の成績が無いので、点数を付けません。</dd>
+</dl>
+
+<p style="margin-top:34px"><a class="back" href="./">← アプリに戻る</a></p>
+<p class="mut">馬券の購入は自己責任でお願いします。このアプリは予想を助ける道具で、的中や利益を約束するものではありません。</p>
+</main>
+</body>
+</html>
