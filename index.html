@@ -29,6 +29,13 @@ summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-rad
 details.more{margin-top:10px}details.more>summary{padding:8px 0;font-size:13px;color:var(--mut)}details.more>summary::before{content:'▸ '}details.more[open]>summary::before{content:'▾ '}
 .tw{overflow-x:auto}table{border-collapse:collapse;font-size:12px;min-width:100%;white-space:nowrap}th,td{padding:3px 8px;text-align:left;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600}
 .btm{display:none}
+.fmc{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px;cursor:pointer}.fmc.k0{border-left-color:var(--good)}.fmc.k1{border-left-color:var(--mut)}.fmc.k2{border-left-color:var(--bad)}.fmc.past{opacity:.45}
+.fmh{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:17px;margin-bottom:6px}.fmk{font-size:13px;font-weight:900;border-radius:99px;padding:1px 10px;border:1px solid var(--line);color:var(--mut)}.fmk.k0{background:var(--good);color:#06130b;border-color:var(--good)}.fmk.k1{color:var(--fg);border-color:var(--mut)}.fmk.k2{background:var(--bad);color:#fff;border-color:var(--bad)}
+.fmr{display:flex;align-items:flex-start;gap:8px;margin:5px 0}.fml{flex:none;width:46px;font-size:13px;color:var(--mut);padding-top:5px}.fmv{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0}.fmn{font-size:14px;margin-right:6px}.fmi{display:inline-flex;align-items:center;white-space:nowrap}.fmr.f1 .fmv{gap:7px 4px}
+.fch{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;border-radius:50%;border:2px solid var(--mut);font-weight:900;font-size:15px;margin-right:9px}.fch i{position:absolute;right:-9px;bottom:-5px;font-style:normal;font-size:10px;font-weight:700;color:var(--mut);background:var(--card);padding:0 2px;border-radius:4px}.fch.ana{border-color:#f5a524;color:#f5a524}
+.fmr.f1 .fch{background:var(--fg);color:var(--card);border-color:var(--fg)}.fmr.f1 .fch.ana{background:#f5a524;color:#1a1204;border-color:#f5a524}
+.fmp{font-size:14px;color:var(--mut);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}.fmp b{color:var(--fg);font-size:16px}
+.fmsum{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 6px}.fmg{font-size:15px;font-weight:900;margin:14px 0 8px;cursor:default}.fmd>summary{cursor:pointer}.fmd{margin:6px 0}#fmb{margin-bottom:18px}
 .rv{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:10px 0}.rvh{font-size:13px;font-weight:700;color:var(--acc);margin:6px 0 2px}.rmore>summary{cursor:pointer;padding:8px 0;list-style:none}.rmore>summary::before{content:"▸ "}.rmore[open]>summary::before{content:"▾ "}
 .rv2{font-size:15px;margin:3px 0;line-height:1.5}.sty{font-size:14px;margin:2px 0}.sty b{display:inline-block;min-width:34px;color:var(--mut)}.sy{font-size:15px;margin:4px 0}.sy b{color:var(--acc);margin-right:4px}
 
@@ -678,9 +685,50 @@ function nightBox(day){
   h+='<p class=sub>かっこの中は 今の単勝 → 締め切りの読み。「人気が落ちる読み」の馬は、過去1年では単勝100円が51円にしかなっていません。「危険な人気馬」は、1〜3番人気なのにオッズを見ない指標では4番手以下の馬です。過去1年、こういう1番人気が3着以内に来たのは48%(ふつうの1番人気は68%)。「指標は上位なのに人気がない馬」は3着以内に来る割合が上がりますが(25%対14%)、買って儲かるところまでは確かめられていません。</p></details></div>';
   return h;
 }
+var FM={};
+function fmKinds(day){var m={},v=NV[day];if(v&&v.races)v.races.forEach(function(r){m[r.rid]=r.kind;});return m;}
+function fmPops(rid){var o=(OD.races||{})[rid];if(!o)return {};var ks=Object.keys(o).sort(function(a,b){return o[a][0]-o[b][0];}),m={};ks.forEach(function(n,i){m[n]=i+1;});return m;}
+function fmChip(no,pp){var p=pp[no];return '<span class="fch'+(p&&p>=6?' ana':'')+'">'+no+(p?'<i>'+p+'</i>':'')+'</span>';}
+function fmRows(r){
+  var pp=fmPops(r.rid);
+  return '<div class="fmr f1"><span class=fml>1列目</span><span class=fmv>'+r.c1.map(function(x){return chipName(x);}).join(' ')+'</span></div>'
+    +'<div class=fmr><span class=fml>2列目</span><span class=fmv>'+(r.c2.length?r.c2.map(function(n){return fmChip(n,pp);}).join(''):'<span class=sub>足す馬なし</span>')+'</span></div>'
+    +'<div class=fmr><span class=fml>3列目</span><span class=fmv>'+(r.c3.length?r.c3.map(function(n){return fmChip(n,pp);}).join(''):'<span class=sub>足す馬なし</span>')+'</span></div>'
+    +'<div class=fmp>この3列で組むと 三連複 <b>'+r.fuku+'点</b>　三連単 <b>'+r.tan+'点</b></div>';
+  function chipName(x){return '<span class=fmi>'+fmChip(x.no,pp)+'<span class=fmn>'+esc(x.name)+'</span></span>';}
+}
+var FMNOTE='1列目は1着の候補、2列目は2着までの候補、3列目は3着までの候補です。2列目・3列目には前の列の馬も入ります(書いてあるのは足す馬だけ)。オッズを見ない指標だけで並べています。頭数は決めておらず、強い馬がはっきりしているレースは少なく、混戦のレースは多くなります。丸の右下の小さい数字は今の人気、金色の丸は6番人気以下の馬です。';
+function formBox(day){
+  var v=FM[day];if(!v||!v.races||!v.races.length)return '';
+  var isT=day===today(),hm=nowHM(),P=v.past||{},K=fmKinds(day),cnt={'固い':0,'ふつう':0,'荒れ':0};
+  v.races.forEach(function(r){if(cnt[K[r.rid]]!==undefined)cnt[K[r.rid]]++;});
+  function kc(k){return k==='固い'?0:(k==='荒れ'?2:1);}
+  var h='<div id=fmb><div class=rvh>'+(isT?'今日の予想':'この日の予想')+'(1列目・2列目・3列目)</div>'
+    +'<div class=fmsum><span class="fmk k0">固い '+cnt['固い']+'</span><span class="fmk k1">ふつう '+cnt['ふつう']+'</span><span class="fmk k2">荒れ '+cnt['荒れ']+'</span><span class=sub>全'+v.races.length+'レース・発走順</span></div>'
+    +'<details class=fmd><summary class=sub>見方を開く</summary><p class=sub>'+FMNOTE+' 「固い・ふつう・荒れ」はレースの性格で、こちらはオッズから見ています(締め切りの読み)。</p></details>';
+  v.races.forEach(function(r){
+    var rd=RD[r.rid]||{},pt=rd.pt||(r.post.slice(0,2)+':'+r.post.slice(2)),past=isT&&hm>pt,k=K[r.rid]||'';
+    h+='<div class="fmc k'+kc(k)+(past?' past':'')+'" data-go="'+r.race+'" data-goplace="'+esc(r.place)+'">'
+      +'<div class=fmh><b>'+pt+' '+esc(r.place)+r.race+'R</b><span class=sub>'+r.n+'頭</span>'+(k?'<span class="fmk k'+kc(k)+'">'+esc(k)+'</span>':'')+(past?'<span class=rpt>発走済</span>':'')+'</div>'+fmRows(r)+'</div>';
+  });
+  if(P.all)h+='<details class=fmd><summary class=sub>この予想の過去の成績を見る(正直な数字)</summary><p class=sub>'+esc(P.period)+'の'+P.all.toLocaleString()+'レースで同じ作り方をした結果です。1着の馬が1列目にいたのは'+P.win_c1.toLocaleString()+'レース。同じ頭数を人気順で並べた場合は'+P.win_c1_pop.toLocaleString()+'レースで、当てた数は人気順にまだ届いていません。この列のとおりに全部のレースを買うと、どの馬券でも買った額より減っています。</p></details>';
+  return h+'</div>';
+}
+function formInRace(){
+  $all('section.race').forEach(function(sec){
+    var o=sec.querySelector('.fmrace');if(o)o.remove();
+    var v=FM[sec.dataset.day];if(!v||!v.races)return;
+    var r=null;v.races.forEach(function(x){if(x.rid===sec.dataset.rid)r=x;});if(!r)return;
+    var k=fmKinds(sec.dataset.day)[r.rid]||'',kc=k==='固い'?0:(k==='荒れ'?2:1);
+    var h='<div class="fmc fmrace k'+kc+'" style="cursor:default"><div class=fmh><b>このレースの予想(3列)</b>'+(k?'<span class="fmk k'+kc+'">'+esc(k)+'</span>':'')+'</div>'+fmRows(r)+'<details class=fmd><summary class=sub>見方</summary><p class=sub>'+FMNOTE+'</p></details></div>';
+    var t=sec.querySelector('.tips');if(t)t.insertAdjacentHTML('beforebegin',h);else sec.insertAdjacentHTML('afterbegin',h);
+  });
+}
 function buildRec(){
   buildRec0();
-  $all('.ov.rec').forEach(function(box){var o=box.querySelector('#nvb');if(o)o.remove();var h=nightBox(box.dataset.day);if(h)box.insertAdjacentHTML('afterbegin',h);});
+  $all('.ov.rec').forEach(function(box){var o=box.querySelector('#nvb');if(o)o.remove();var h=nightBox(box.dataset.day);if(h)box.insertAdjacentHTML('afterbegin',h);
+    o=box.querySelector('#fmb');if(o)o.remove();h=formBox(box.dataset.day);if(h)box.insertAdjacentHTML('afterbegin',h);});
+  formInRace();
 }
 function buildRec0(){
   $all('.ov.rec').forEach(function(box){
@@ -723,6 +771,9 @@ function loadOdds(){
     }).catch(function(){});
     fetch('night.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
       if(j){NV=j;buildRec();}
+    }).catch(function(){});
+    fetch('form.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(j){FM=j;buildRec();}
     }).catch(function(){});
     fetch('results.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
       if(j&&j.races){RS=j;applyOdds();if(S.place==='記録'){if(LV==='res')buildRes();else buildLed();}}
