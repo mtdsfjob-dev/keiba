@@ -126,7 +126,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .rz .rn{font-size:13px;font-weight:700}
 .rz .rn em{font-style:normal;font-weight:800;font-size:12px;margin-left:6px}
 .rz .rn em.u{color:var(--up)}.rz .rn em.d{color:var(--dn)}
-.rz .rf{grid-column:1/2;font-size:12px;color:var(--mut);line-height:1.45}
+.rz .rf{grid-column:1/3;font-size:12px;color:var(--mut);line-height:1.45}
+.rz .rf p{margin:1px 0;padding-left:1em;text-indent:-1em}
+.rz .rf p:before{content:"・"}
 .rz .bar2{grid-row:1/3;grid-column:2;height:6px;border-radius:3px;background:var(--sf2);position:relative;overflow:hidden}
 .rz .bar2 u{position:absolute;top:0;bottom:0;border-radius:3px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -334,7 +336,7 @@ function reasons(h,r){
   var row=function(t){var u=t[1]>0,w=Math.min(50,Math.abs(t[1])/0.9*50);
     return '<div class="rz"><div class="rn">'+esc(t[0])+'<em class="'+(u?"u":"d")+'">'+size(t[1])+(u?"上げ":"下げ")+'</em></div>'
       +'<div class="bar2"><u style="'+(u?"left:50%":"right:50%")+';width:'+w.toFixed(0)+'%;background:var(--'+(u?"up":"dn")+')"></u></div>'
-      +'<div class="rf">'+esc((GF[t[0]]||function(){return ""})(h,r))+'</div></div>'};
+      +'<div class="rf">'+(t[2]&&t[2].length?t[2].map(function(x){return '<p>'+esc(x)+'</p>'}).join(""):esc((GF[t[0]]||function(){return ""})(h,r)))+'</div></div>'};  // t[2] = 根拠の文(rl_why.py)。無いときは前の一言
   return '<div class="why"><h4>評価を上げた理由</h4>'+(up.length?up.map(row).join(""):'<div class="rf" style="font-size:12px;color:var(--mut)">ほかの馬より目立って良い点はありません</div>')
     +'<h4>評価を下げた理由</h4>'+(dn.length?dn.map(row).join(""):'<div class="rf" style="font-size:12px;color:var(--mut)">ほかの馬より目立って悪い点はありません</div>')+'</div>';
 }
