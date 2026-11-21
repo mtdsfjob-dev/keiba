@@ -30,7 +30,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .brand{display:flex;align-items:center;gap:8px;height:28px}
 .brand svg{flex:none}
 .brand b{font-size:17px;letter-spacing:.14em;font-weight:800}
-.brand .st{margin-left:auto;font-size:11px;color:var(--mut)}
+.brand .st{margin-left:auto;font-size:11px;color:var(--mut)}@media (max-width:360px){.brand b{font-size:15px;letter-spacing:.08em}.brand .st{font-size:10px}}
+.help{display:flex;align-items:center;gap:3px;height:26px;padding:0 9px;border-radius:13px;border:1px solid var(--ln);color:var(--acc);font-size:12px;font-weight:700;text-decoration:none;flex:none}
 .seg{display:flex;gap:6px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
 .seg::-webkit-scrollbar{display:none}
 .seg button{flex:none;height:32px;padding:0 14px;border-radius:16px;border:1px solid var(--ln);font-size:13px;font-weight:600;color:var(--mut);white-space:nowrap}
@@ -179,6 +180,7 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
     <button class="back" id="back" hidden aria-label="一覧へ戻る"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>一覧</button>
     <span id="logo" style="display:flex;align-items:center;gap:8px"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="9" fill="none" stroke="var(--acc)" stroke-width="3.2"/><path d="M21 21l7 7" stroke="var(--acc)" stroke-width="3.6" stroke-linecap="round"/><circle cx="14" cy="14" r="3.4" fill="var(--acc)"/></svg><b>RACE LENS</b></span>
     <span class="st num" id="st"></span>
+    <a class="help" id="help" href="guide.html" aria-label="使い方"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>使い方</a>
   </div>
   <div class="seg" id="days"></div>
 </header>
@@ -370,7 +372,7 @@ function raceView(rid){
   h+=horses(rid,F);
   $("#main").innerHTML=h;
 }
-function about(){return '<div class="about"><b>RACE LENS について</b><br>評価はオッズ・人気・予想家の印を使わず、過去走・コース・騎手・調教・血統などから出した1着の見込みです。オッズは、レースの性格(固い・ふつう・荒れ)と、評価と人気のずれを見るためだけに使っています。<br><b>本線</b>は評価の上位どおりの、当たりやすい買い目。<b>妙味</b>は、過去5年に100円が100円を超えて戻った形のレースだけに出す買い目です。どちらも金額は出しません。</div>'}
+function about(){return '<div class="about"><b>RACE LENS について</b><br>評価はオッズ・人気・予想家の印を使わず、過去走・コース・騎手・調教・血統などから出した1着の見込みです。オッズは、レースの性格(固い・ふつう・荒れ)と、評価と人気のずれを見るためだけに使っています。<br><b>本線</b>は評価の上位どおりの、当たりやすい買い目。<b>妙味</b>は、過去5年に100円が100円を超えて戻った形のレースだけに出す買い目です。どちらも金額は出しません。<br><a href="guide.html" style="color:var(--acc);font-weight:700">使い方を詳しく見る →</a></div>'}
 /* ===== 記録(買った馬券)。今までのアプリと同じ保存の形 ===== */
 var LK="keiba_ledger_v1",DK="keiba_ledger_del",SK="keiba_sync_v1",LSC="day",LAMT=100,SYN={msg:"",busy:false};
 var NEED={"単勝":1,"複勝":1,"枠連":2,"馬連":2,"ワイド":2,"馬単":2,"三連複":3,"三連単":3},ORD={"馬単":1,"三連単":1},KINDS=["単勝","複勝","枠連","馬連","ワイド","馬単","三連複","三連単"];

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RACE LENS の使い方</title>
+<meta name="theme-color" content="#0e1116">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#0e1116;--sf:#161b22;--sf2:#1d232c;--ln:#2a313c;--fg:#e8edf3;--mut:#8b96a5;--dim:#5d6876;--acc:#4fd1c5;--hon:#5aa9ff;--myo:#f5a524;--up:#3ecf8e;--dn:#ff6b81;--r:12px}
+@media (prefers-color-scheme:light){:root{--bg:#f5f6f8;--sf:#fff;--sf2:#f0f2f5;--ln:#e1e5ea;--fg:#141a21;--mut:#5f6b7a;--dim:#98a2ae;--acc:#0f9488;--hon:#1f6fd1;--myo:#c47a00;--up:#11935f;--dn:#d6334f}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font:15px/1.7 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",sans-serif;-webkit-text-size-adjust:100%;padding-bottom:calc(32px + env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--ln);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;align-items:center;gap:8px}
+.top a{display:flex;align-items:center;gap:2px;color:var(--acc);font-weight:600;text-decoration:none}
+.top b{margin-left:auto;font-size:13px;color:var(--mut);font-weight:600}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+h1{font-size:22px;margin:20px 0 4px}
+.lead{color:var(--mut);font-size:14px;margin:0 0 8px}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.toc a{font-size:12px;font-weight:700;color:var(--fg);background:var(--sf2);border-radius:14px;padding:4px 10px;text-decoration:none}
+h2{font-size:13px;letter-spacing:.08em;color:var(--acc);margin:32px 0 10px;padding-top:4px}
+h3{font-size:16px;margin:18px 0 6px}
+p{margin:6px 0}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);padding:12px 14px;margin:10px 0}
+.mut{color:var(--mut);font-size:13px}
+dl{margin:8px 0;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:baseline}
+dt{font-weight:800;white-space:nowrap}
+dd{margin:0;font-size:14px}
+.n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:10px;background:var(--acc);color:#04201d;font-size:12px;font-weight:800;flex:none}
+/* 見本(アプリと同じ見た目) */
+.demo{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);overflow:hidden;margin:10px 0}
+.row{display:grid;grid-template-columns:44px 1fr auto;column-gap:10px;align-items:center;padding:10px 12px;min-height:64px}
+.t{font-size:14px;font-weight:700;color:var(--mut);align-self:start;line-height:1.3}.t small{display:block;font-size:10px;font-weight:600;color:var(--dim);margin-top:3px}
+.l1{display:flex;align-items:baseline;gap:6px;white-space:nowrap}.vr{font-weight:800;font-size:16px}.nm{font-size:14px}
+.l2{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.k{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:700;border:1px solid currentColor;white-space:nowrap}
+.k.hard{color:var(--up)}.k.mid{color:var(--mut)}.k.wild{color:var(--dn)}
+.tag{font-size:11px;background:var(--sf2);border-radius:4px;padding:1px 6px;white-space:nowrap}
+.res{font-size:13px;font-weight:700;white-space:nowrap}.res i{font-style:normal;color:var(--dim);font-weight:400;font-size:11px;margin-right:4px}
+.badge{font-size:11px;font-weight:800;padding:2px 7px;border-radius:10px;color:#1a1204;background:var(--myo);white-space:nowrap}
+.mk{position:relative;overflow:visible;margin-top:18px}.mk .row>div{min-width:0}.mk .nm{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pin{position:absolute;width:18px;height:18px;border-radius:9px;background:var(--acc);color:#04201d;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--bg)}
+.lbl{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.lbl.hon{background:color-mix(in srgb,var(--hon) 18%,transparent);color:var(--hon)}
+.lbl.myo{background:color-mix(in srgb,var(--myo) 20%,transparent);color:var(--myo)}
+.tk{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--ln)}
+.tk .bt{font-size:13px;font-weight:700;color:var(--mut)}.tk .cb{font-size:20px;font-weight:800;white-space:nowrap}
+.tk .st{text-align:right;font-size:12px;color:var(--mut);white-space:nowrap;line-height:1.35}.tk .st b{color:var(--fg);font-size:13px}
+.hm{font-size:10px;font-weight:800;color:var(--up);margin-left:6px}
+.rz{display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:14px}.rz b{font-weight:700}.u{color:var(--up);font-weight:800;font-size:12px}.d{color:var(--dn);font-weight:800;font-size:12px}
+.hsum{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:10px 12px}
+.wk{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;background:#e8433f;color:#fff}
+.ev{text-align:right;white-space:nowrap;font-size:11px;color:var(--mut)}.ev b{font-size:17px;color:var(--fg)}
+.chip2{font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;margin-right:6px}
+.chip2.ana{background:color-mix(in srgb,var(--myo) 22%,transparent);color:var(--myo)}.chip2.dang{background:color-mix(in srgb,var(--dn) 18%,transparent);color:var(--dn)}.chip2.out{background:var(--sf2);color:var(--dim)}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{text-align:left;padding:6px 8px 6px 0;border-bottom:1px solid var(--ln);vertical-align:top}
+th{color:var(--mut);font-weight:700;font-size:12px;white-space:nowrap}
+</style>
+</head>
+<body>
+<header class="top"><a href="./"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>アプリへ</a><b>使い方</b></header>
+<main class="wrap">
+<h1>RACE LENS の使い方</h1>
+<p class="lead">見る順番は「レース一覧 → レースの中(買い目) → 馬のカード(評価の理由)」です。買った馬券は「記録」タブに残せます。</p>
+<div class="toc"><a href="#list">レース一覧</a><a href="#race">レースの中</a><a href="#tickets">買い目</a><a href="#horse">馬のカード</a><a href="#rec">記録</a><a href="#time">更新の時刻</a><a href="#home">ホーム画面に置く</a></div>
+
+<h2 id="list">1. レース一覧</h2>
+<p>その日の全レースを、発走の早い順に並べています。上のボタンで日付と競馬場を切り替えます。1行が1レースです。押すとそのレースの中に入ります。</p>
+<div class="demo mk"><div class="row">
+  <span class="t">15:40<small>ダ1900</small><small>15頭</small></span>
+  <div><div class="l1"><span class="vr">京都11R</span><span class="nm">シトリンステークス</span></div>
+  <div class="l2"><span class="k wild">荒れ</span><span class="tag">評価が割れている</span><span class="tag">人気馬の評価が低い</span></div></div>
+  <span class="res"><i>結果</i>12-10-9</span></div>
+  <span class="pin" style="left:10px;top:-9px">1</span><span class="pin" style="left:66px;top:-9px">2</span><span class="pin" style="left:44px;top:40px">3</span><span class="pin" style="right:10px;top:-9px">4</span>
+</div>
+<dl>
+<dt><span class="n">1</span></dt><dd>発走時刻・距離(芝/ダ)・走る頭数。取消の馬は数に入りません。</dd>
+<dt><span class="n">2</span></dt><dd>競馬場とレース番号、レース名。名前の無いレースは「2歳未勝利」のようにクラスを出します。</dd>
+<dt><span class="n">3</span></dt><dd>レースの性格と特徴(下の表)。</dd>
+<dt><span class="n">4</span></dt><dd>結果が出たら1〜3着の馬番。結果の前は、妙味の買い目があるレースに <span class="badge">妙味</span> が付きます。</dd>
+</dl>
+<h3>レースの性格</h3>
+<p>単勝オッズから決めています。「人気どおりに決まった場合、三連複の人気上位5組のどれかで決まる見込み」が目安です。</p>
+<table>
+<tr><th>性格</th><th>目安</th><th>意味</th></tr>
+<tr><td><span class="k hard">固い</span></td><td>56%以上</td><td>人気の馬で決まりやすい。当たりやすいが配当は低め</td></tr>
+<tr><td><span class="k mid">ふつう</span></td><td>28〜56%</td><td>その間</td></tr>
+<tr><td><span class="k wild">荒れ</span></td><td>28%未満</td><td>人気が割れていて、だれが来てもおかしくない</td></tr>
+</table>
+<p class="mut">オッズの発売前は「性格は当日」と出ます。</p>
+<h3>特徴の札</h3>
+<table>
+<tr><th>札</th><th>意味</th></tr>
+<tr><td><span class="tag">評価1位が抜けている</span></td><td>評価1位の馬の1着の見込みが35%以上</td></tr>
+<tr><td><span class="tag">評価が割れている</span></td><td>評価の上位3頭の見込みを足しても45%以下</td></tr>
+<tr><td><span class="tag">人気馬の評価が低い</span></td><td>1〜3番人気の中に、評価が4位以下の馬がいる</td></tr>
+<tr><td><span class="tag">人気薄に高い評価</span></td><td>評価3位以内の馬の中に、6番人気以下の馬がいる</td></tr>
+</table>
+<p class="mut">一覧には札を2つまで出します。全部はレースの中で見られます。</p>
+
+<h2 id="race">2. レースの中</h2>
+<p>上から順に「レースの見出し → 結果(終わったレースだけ) → 推奨の買い目 → 出走馬」です。左上の「一覧」で戻ります。</p>
+<p>見出しの下の小さな文は、そのレースの性格の数字(上の表の目安)です。</p>
+
+<h2 id="tickets">3. 推奨の買い目</h2>
+<p>買い目には2種類あります。金額は出しません。いくら買うかはご自身で決めてください。</p>
+<div class="demo">
+  <div style="padding:10px 14px"><span class="lbl hon">本線</span> <span class="mut">当たりやすさを優先した買い目</span></div>
+  <div class="tk"><span class="bt">ワイド</span><span class="cb">9-12<span class="hm">的中</span></span><span class="st">このレース <b>14%</b><br>過去の的中率 <b>18.1%</b></span></div>
+</div>
+<h3><span class="lbl hon">本線</span> 当てに行く買い目</h3>
+<p>評価の上位の馬をそのまま並べた組み合わせです。走る馬が3頭以上なら、全レースに出ます。</p>
+<table>
+<tr><th>券種</th><th>買い目</th></tr>
+<tr><td>単勝・複勝</td><td>評価1位</td></tr>
+<tr><td>ワイド・馬連</td><td>評価1位と2位</td></tr>
+<tr><td>馬単</td><td>評価1位 → 2位</td></tr>
+<tr><td>三連複</td><td>評価1位・2位・3位</td></tr>
+<tr><td>三連単</td><td>評価1位 → 2位 → 3位</td></tr>
+</table>
+<dl>
+<dt>このレース</dt><dd>評価から計算した、このレースで当たる見込み。</dd>
+<dt>過去の的中率</dt><dd>2022〜2026年の同じ性格のレースで、同じ買い方をしたときに当たった割合。オッズの発売前は全レースの割合です。</dd>
+</dl>
+<h3><span class="lbl myo">妙味</span> うまみのある買い目</h3>
+<p>当たる回数は少ないものの、過去に100円が100円より多く戻った形のレースだけに出ます。出ないレースのほうが多いです。オッズの発売後に出ます。</p>
+<table>
+<tr><th>形</th><th>買い目</th><th>過去の成績(100円あたり)</th></tr>
+<tr><td>固いレースで、人気薄に高い評価の馬がいる</td><td>その馬の単勝・複勝、その馬と「その馬を除いた評価1位」の馬連</td><td>単勝 201円・複勝 143円・馬連 188円(66レース)</td></tr>
+<tr><td>ふつうのレースで、人気薄に高い評価の馬がいる</td><td>馬単(その馬→その馬を除いた評価1位)、同じ2頭の馬連</td><td>馬単 123円・馬連 106円(1,287レース)</td></tr>
+<tr><td>ふつうのレースで、評価の見込みが人気の3倍以上の馬がいる</td><td>その馬の単勝</td><td>117円(5,911頭)</td></tr>
+</table>
+<p class="mut">どれも大きな当たり数本で100円を超えている形です。外れが続くことがあります。各買い目の下に、当たった数などの細かい数字を出しています。</p>
+<h3>的中と記録</h3>
+<p>結果が出ると、当たった買い目が緑になり「的中」が付きます。買い目の右の「＋」を押して金額を入れると、その買い目を記録タブに残せます。</p>
+
+<h2 id="horse">4. 馬のカード</h2>
+<p>「出走馬」の各行を押すと開きます。右上の「評価順」「馬番順」で並べ替えられます。</p>
+<div class="demo"><div class="hsum"><span class="wk">12</span><span><b>メルカントゥール</b><br><span class="chip2 ana">人気薄に高評価</span><span class="mut">牡4・C．デム 57.0kg</span></span><span class="ev">評価2位 <b>14%</b><br>4.0倍・3番人気</span></div></div>
+<dl>
+<dt>評価◯位 ◯%</dt><dd>オッズ・人気・予想家の印を使わずに出した、1着になる見込み。走る馬だけで合計100%です。</dd>
+<dt>◯倍・◯番人気</dt><dd>今の単勝オッズ。評価には使っていません。</dd>
+<dt><span class="chip2 ana">人気薄に高評価</span></dt><dd>評価3位以内なのに6番人気以下。</dd>
+<dt><span class="chip2 dang">人気に評価が届かない</span></dt><dd>1〜3番人気なのに評価が4位以下。</dd>
+<dt><span class="chip2 out">取消</span></dt><dd>オッズが無い(出走しない)馬。</dd>
+</dl>
+<h3>評価を上げた理由・下げた理由</h3>
+<p>評価の計算を下の11のまとまりに分けて、同じレースの馬の平均より上か下かを表したものです。上げた理由・下げた理由を、それぞれ大きい順に3つまで出します。</p>
+<div class="card"><div class="rz"><b>最近のレースの成績</b><span class="u">大きく上げ</span></div><div class="mut">近走 2着・1着・1着</div><div class="rz"><b>調教</b><span class="d">少し下げ</span></div><div class="mut">調教6本。本数・時計・追い切りの中身を、ほかの出走馬と比べて</div></div>
+<p>「大きく」はとくに大きい差(全体のおよそ7%)、何も付かないものは中くらいの差、「少し」は小さい差です。ほとんど差の無いまとまりは出しません。</p>
+<table>
+<tr><th>まとまり</th><th>中身</th></tr>
+<tr><td>最近のレースの成績</td><td>近走の着順・タイム・上がり</td></tr>
+<tr><td>相手との力関係</td><td>これまで戦った相手の強さと、その中での着順</td></tr>
+<tr><td>このコース・距離の成績</td><td>同じ芝ダ・距離・競馬場での成績</td></tr>
+<tr><td>枠・馬番</td><td>その条件での枠ごとの成績</td></tr>
+<tr><td>血統</td><td>父・母父などの産駒の成績</td></tr>
+<tr><td>騎手</td><td>騎手の成績、乗り替わり</td></tr>
+<tr><td>厩舎・陣営</td><td>調教師の成績、厩舎と騎手の組み合わせ</td></tr>
+<tr><td>調教</td><td>調教の本数・時計・中身</td></tr>
+<tr><td>年齢・間隔・斤量</td><td>年齢、前走からの日数、斤量</td></tr>
+<tr><td>クラス(格)</td><td>前走から格が上がったか下がったか</td></tr>
+<tr><td>脚質・展開</td><td>脚質と、このレースの先行馬の数</td></tr>
+</table>
+<p>カードの下には「今回」(脚質・乗り替わり・間隔・調教の本数)、「近5走」(横にずらすと全部見えます)、「血統」が出ます。</p>
+
+<h2 id="rec">5. 記録</h2>
+<p>下の「記録」タブで、買った馬券を残して、成績を見られます。</p>
+<dl>
+<dt>上の4つ</dt><dd>買った額・戻った額・差し引き・100円あたりの戻り。日付のボタンと「全期間」で切り替えます。結果と払い戻しが出ていない馬券は、集計に入りません。</dd>
+<dt>記録する</dt><dd>レースと券種を選び、買い方(1点・ボックス・ながし・フォーメーション)を選んで馬番を押し、1点の金額を入れて「記録する」。組み合わせの数と合計が下に出ます。8頭以下のレースは枠連が売られないので、選べません。</dd>
+<dt>×</dt><dd>記録を消します。</dd>
+<dt>控え・同期</dt><dd>記録はこの端末の中にだけ保存され、公開されません。「控えをコピー」で文字として保管できます。「同期の設定」をすると、非公開の置き場に保存して、スマホとパソコンで共有できます。</dd>
+</dl>
+
+<h2 id="time">6. 更新の時刻</h2>
+<p>レースの日は、朝8時30分から16時50分まで、5分ごとにオッズと結果を取り込みます。アプリへの反映は、結果が出たときと発走の直前はすぐ、それ以外は最大で10分ほど遅れます。アプリを開いている間は1分ごとに読み直します。右上の「オッズ ◯:◯ 時点」が、いつのオッズかを表します。</p>
+<p>性格・妙味の買い目・人気とのずれの印は、発走の少し前(約10分前)の更新で固まり、そのあとは変わりません。オッズの数字はそのあとも動きます。</p>
+<p>評価と馬のカードは、前の日に作ります(枠順が決まってから)。当日は変わりません。</p>
+
+<h2 id="home">7. iPhone のホーム画面に置く</h2>
+<p>Safari でこのアプリを開き、下の「共有」ボタン(四角から上向きの矢印)→「ホーム画面に追加」。ホーム画面のアイコンから、アプリのように開けます。</p>
+<p style="margin-top:28px"><a href="./" style="color:var(--acc);font-weight:700;text-decoration:none">← アプリへ戻る</a></p>
+</main>
+</body>
+</html>
