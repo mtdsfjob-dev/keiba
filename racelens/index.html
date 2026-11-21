@@ -61,6 +61,16 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .tag{flex:none;font-size:11px;color:var(--fg);background:var(--sf2);border-radius:4px;padding:1px 6px}
 .badge{font-size:11px;font-weight:800;padding:2px 7px;border-radius:10px;flex:none}
 .badge.myo{color:#1a1204;background:var(--myo)}
+/* 11/22 作戦(plan.json) */
+.pc{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:800;flex:none}
+.pc.p1{color:#04140d;background:var(--up)}.pc.p2{color:#1a1204;background:var(--myo)}.pc.p3{color:var(--mut);border:1px solid var(--ln)}
+.plan{border:1px solid var(--ln);border-radius:14px;padding:12px 14px;margin:12px 0 4px;background:var(--card,transparent)}
+.plan h3{margin:0 0 6px;font-size:14px}
+.plan .prow{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:1px;padding:8px 0;border-top:1px solid var(--ln);text-decoration:none;color:inherit}
+.plan .prow:first-of-type{border-top:0}.plan .prow .pr-r{font-weight:700;white-space:nowrap}.plan .prow .pr-t{font-weight:800;white-space:nowrap}
+.plan .prow .pr-v{grid-column:1/3;font-size:12px;color:var(--mut)}
+.plan .big{font-size:20px;font-weight:800;margin:4px 0;white-space:nowrap}.plan .why{font-size:13px;line-height:1.7;margin:6px 0}
+.plan .ok{color:var(--up);font-weight:800}.plan .ng{color:var(--dn);font-weight:800}
 /* レースの画面 */
 .bar{display:flex;align-items:center;gap:8px;height:28px}
 .back{display:flex;align-items:center;gap:2px;font-size:15px;font-weight:600;color:var(--acc)}
@@ -190,7 +200,7 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 <nav class="nav" id="nav"><button data-nav="race" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>レース</button><button data-nav="rec"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>記録</button></nav>
 <script>
 "use strict";
-var C=null,OD={},PR={},RS={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
+var C=null,OD={},PR={},RS={},PL={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
 var KC={"固い":"hard","ふつう":"mid","荒れ":"wild"};
 var GW={"S":0};
 function $(s){return document.querySelector(s)}
@@ -200,7 +210,7 @@ function today(){var t=new Date();return t.getFullYear()+"-"+String(t.getMonth()
 function nowHM(){var t=new Date();return String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")}
 function get(u){return fetch(u+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():{}}).catch(function(){return {}})}
 function load(first){
-  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json")]).then(function(a){
+  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json"),get("plan.json")]).then(function(a){PL=a[4]||{};
     if(first)C=a[0];OD=(a[1]&&a[1].races)||{};PR=(a[2]&&a[2].races)||{};RS=(a[3]&&(a[3].races||a[3]))||{};
     var st=a[1]&&a[1].stamp?"オッズ "+String(a[1].stamp).replace(/^\d+\/\d+\s*/,"")+" 時点":"オッズ発売前";$("#st").textContent=st;
     if(!S.day){var td=today();S.day=C.days.indexOf(td)>=0?td:C.days[C.days.length-1];for(var i=0;i<C.days.length;i++){if(C.days[i]>=td){S.day=C.days[i];break}}}
@@ -240,6 +250,38 @@ function head(){
   pls.forEach(function(p){h+='<button aria-pressed="'+(S.pl===p)+'" data-pl="'+esc(p)+'">'+esc(p)+'</button>'});}
   b.innerHTML=h;
 }
+/* 11/22 作戦(1レースずつ馬の並びを読んで決めた買い方。plan.json) */
+function planOf(rid){return (PL.races&&PL.races[rid])||null}
+function planChip(rid){var x=planOf(rid);if(!x||x.c==="見送り")return "";return '<span class="pc '+(x.c==="本線"?"p1":(x.c==="勝負"?"p2":"p3"))+'">'+esc(x.c)+'</span>'}
+function planHit(rid,tk,pts){/* 結果が出たら、作戦の買い目の払い戻しの合計(results.json の pays。同着・取消・少頭数も払い戻しどおり) */
+  var x=RS[rid];if(!x||!tk)return null;var pay=x.pays||null;if(!pay)return null;
+  var m=tk.split(" "),bt=m[0],cs=m.slice(1).join(" ").split("・").map(function(c){return c.split("-").map(Number)});
+  var ord=(bt==="馬単"||bt==="三連単"),ret=0,lst=pay[bt]||[];
+  cs.forEach(function(c){var key=(ord?c:c.slice().sort(function(a,b){return a-b})).join("-");lst.forEach(function(t){if(String(t[0])===key)ret+=+t[1]})});
+  return {ret:ret,st:(pts||cs.length)*100};
+}
+function planLab(h){if(!h)return "";if(h.ret>h.st)return '<span class="ok">勝ち</span>(払い戻し '+h.ret+'円)';if(h.ret>0)return '<span class="ng">的中・勝ちにならず</span>(払い戻し '+h.ret+'円)';return '<span class="ng">外れ</span>'}
+function planSum(){
+  if(!PL.day||PL.day!==S.day||!PL.core)return "";
+  var h='<div class="plan"><h3>今日の作戦</h3><div class="note" style="margin-top:0">買ったレースは全部「当たって、そのレースで収支プラス」を狙う本線</div>';
+  PL.core.forEach(function(c){var r=C.races[c.rid];if(!r)return;var ht=planHit(c.rid,c.tk,1);
+    h+='<a class="prow" href="#'+encodeURIComponent(c.rid)+'" data-rid="'+esc(c.rid)+'"><span class="pr-r num">'+esc(r.pt)+' '+esc(r.pl)+r.r+'R</span><span class="pr-t">'+esc(c.tk)+'</span>'
+      +'<span class="pr-v">'+(ht===null?'見込み '+c.hit+'%・ここまで全部 '+c.cum+'%':planLab(ht))+'</span></a>'});
+  var sh=Object.keys(PL.races).filter(function(k){return PL.races[k].c==="勝負"&&C.races[k]}).sort(function(a,b){return C.races[a].pt.localeCompare(C.races[b].pt)});
+  if(sh.length){h+='<div class="note">勝負(当たれば大きめ・外れる見込みも高い。全部勝つを優先するなら買わない)</div>';
+    sh.forEach(function(k){var x=PL.races[k],r=C.races[k],ht=planHit(k,x.tk,x.pts);h+='<a class="prow" href="#'+encodeURIComponent(k)+'" data-rid="'+esc(k)+'"><span class="pr-r num">'+esc(r.pt)+' '+esc(r.pl)+r.r+'R</span><span class="pr-t">'+esc(x.tk)+'</span><span class="pr-v">'+(ht===null?'見込み '+x.hit+'%':planLab(ht))+'</span></a>'})}
+  return h+'<div class="note">'+esc(PL.note||"")+'</div></div>';
+}
+function planSec(rid){
+  var x=planOf(rid);if(!x)return "";var ht=planHit(rid,x.tk,x.pts);
+  var h='<div class="sec"><div class="sh"><h2>作戦</h2>'+planChip(rid)+(x.c==="見送り"?'<span class="pc p3">見送り</span>':'')+'</div><div class="plan" style="margin-top:6px">';
+  if(x.tk){h+='<div class="big num">'+esc(x.tk)+'</div><div class="note" style="margin-top:0">100円×'+x.pts+'点・当たる見込み <b>'+x.hit+'%</b>'+(ht===null?'':'・'+planLab(ht))+'</div><div class="note">'+esc(x.cond)+'</div>'}
+  else h+='<div class="big">買わない</div>';
+  h+='<div class="why">'+esc(x.why)+'</div>';
+  if(x.tk)h+='<div class="note">ここの見込みは、過去(2023〜2026年)に実際に当たった割合に合わせて補正した数字です。下の「推奨の買い目」の「このレース」は補正前の数字なので、少し高く出ます。</div>';
+  if(x.alt)h+='<div class="note">別の手: <b>'+esc(x.alt.tk)+'</b>(100円×'+x.alt.pts+'点)・当たる見込み '+x.alt.hit+'%。'+esc(x.alt.cond)+'</div>';
+  return h+'</div></div>';
+}
 function listView(){
   var arr=Object.keys(C.races).filter(function(k){var r=C.races[k];return r.day===S.day&&(S.pl==="all"||r.pl===S.pl)});
   arr.sort(function(a,b){var x=C.races[a],y=C.races[b];return (x.pt||"").localeCompare(y.pt||"")||x.pl.localeCompare(y.pl)||x.r-y.r});
@@ -252,11 +294,11 @@ function listView(){
     h+='<li class="row'+(done?" done":"")+'" data-rid="'+esc(rid)+'">'
       +'<span class="t num">'+esc(r.pt)+'<small>'+esc(r.surf)+r.dist+'</small><small>'+F.live.length+'頭</small></span>'
       +'<div class="m"><div class="l1"><span class="vr">'+esc(r.pl)+r.r+'R</span>'+(r.gr?'<span class="gr">'+r.gr+'</span>':"")+'<span class="nm">'+esc(r.name||r.cls)+'</span></div>'
-      +'<div class="l2">'+kindChip(k)+tg+'</div></div>'
+      +'<div class="l2">'+planChip(rid)+kindChip(k)+tg+'</div></div>'
       +'<div class="rt">'+right+'</div></li>';
   });
   var sum='<div class="sum"><span>全<b>'+arr.length+'</b>レース</span><span>固い <b>'+nk["固い"]+'</b>・ふつう <b>'+nk["ふつう"]+'</b>・荒れ <b>'+nk["荒れ"]+'</b></span><span>妙味のあるレース <b>'+nmy+'</b></span></div>';
-  $("#main").innerHTML=sum+(arr.length?'<ul class="list">'+h+'</ul>':'<div class="empty">この日のレースはありません</div>')+about();
+  $("#main").innerHTML=planSum()+sum+(arr.length?'<ul class="list">'+h+'</ul>':'<div class="empty">この日のレースはありません</div>')+about();
 }
 /* 本線: 評価の上位どおり。このレースの見込みは評価の確率からの計算(Harville)。過去の成績は同じ性格のレース(2022〜26年) */
 function hon(rid,F){
@@ -370,6 +412,7 @@ function raceView(rid){
     +'<div class="tags">'+kindChip(k)+tg+'</div>'
     +(p.c5!=null?'<div class="note">性格は単勝オッズで決めています。人気どおりなら上位5組の三連複で決まる見込みが '+Math.round(p.c5*100)+'%(固い=56%以上、荒れ=28%未満)。</div>':'')+'</div>';
   h+=result(rid);
+  h+=planSec(rid);
   h+='<div class="sec"><div class="sh"><h2>推奨の買い目</h2><small>金額はご自身で</small></div>'+(PR[rid]||F.hasO?myo(rid)+hon(rid,F):hon(rid,F)+'<div class="note">妙味の買い目は、当日のオッズが出てから表示します。</div>')+'</div>';
   h+=horses(rid,F);
   $("#main").innerHTML=h;
