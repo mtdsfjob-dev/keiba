@@ -201,7 +201,7 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 <nav class="nav" id="nav"><button data-nav="race" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>レース</button><button data-nav="rec"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>記録</button></nav>
 <script>
 "use strict";
-var C=null,OD={},OC={},HN={},PR={},RS={},PL={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
+var C=null,OD={},OC={},HN={},RD={},PR={},RS={},PL={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
 var KC={"固い":"hard","ふつう":"mid","荒れ":"wild"};
 var GW={"S":0};
 function $(s){return document.querySelector(s)}
@@ -211,7 +211,7 @@ function today(){var t=new Date();return t.getFullYear()+"-"+String(t.getMonth()
 function nowHM(){var t=new Date();return String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")}
 function get(u){return fetch(u+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():{}}).catch(function(){return {}})}
 function load(first){
-  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json"),get("plan.json"),get("hint.json")]).then(function(a){PL=a[4]||{};HN=a[5]||{};OC=(a[1]&&a[1].combo)||{};
+  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json"),get("plan.json"),get("hint.json"),get("redo.json")]).then(function(a){PL=a[4]||{};HN=a[5]||{};RD=a[6]||{};OC=(a[1]&&a[1].combo)||{};
     if(first)C=a[0];OD=(a[1]&&a[1].races)||{};PR=(a[2]&&a[2].races)||{};RS=(a[3]&&(a[3].races||a[3]))||{};
     var st=a[1]&&a[1].stamp?"オッズ "+String(a[1].stamp).replace(/^\d+\/\d+\s*/,"")+" 時点":"オッズ発売前";$("#st").textContent=st;
     if(!S.day){var td=today();S.day=C.days.indexOf(td)>=0?td:C.days[C.days.length-1];for(var i=0;i<C.days.length;i++){if(C.days[i]>=td){S.day=C.days[i];break}}}
@@ -267,13 +267,29 @@ function planSum(){
   var h='<div class="plan"><h3>今日の作戦</h3><div class="note" style="margin-top:0">買ったレースは全部「当たって、そのレースで収支プラス」を狙う本線</div>';
   PL.core.forEach(function(c){var r=C.races[c.rid];if(!r)return;var ht=planHit(c.rid,c.tk,1);
     h+='<a class="prow" href="#'+encodeURIComponent(c.rid)+'" data-rid="'+esc(c.rid)+'"><span class="pr-r num">'+esc(r.pt)+' '+esc(r.pl)+r.r+'R</span><span class="pr-t">'+esc(c.tk)+'</span>'
-      +'<span class="pr-v">'+(ht===null?'見込み '+c.hit+'%・ここまで全部 '+c.cum+'%':planLab(ht))+'</span></a>'});
+      +'<span class="pr-v">'+(ht===null?(redoOf(c.rid)&&redoOf(c.rid).ph!=null?'当たる確率 '+redoOf(c.rid).ph+'%':'見込み '+c.hit+'%'):planLab(ht))+'</span></a>'});
   var sh=Object.keys(PL.races).filter(function(k){return PL.races[k].c==="勝負"&&C.races[k]}).sort(function(a,b){return C.races[a].pt.localeCompare(C.races[b].pt)});
   if(sh.length){h+='<div class="note">勝負(当たれば大きめ・外れる見込みも高い。全部勝つを優先するなら買わない)</div>';
-    sh.forEach(function(k){var x=PL.races[k],r=C.races[k],ht=planHit(k,x.tk,x.pts);h+='<a class="prow" href="#'+encodeURIComponent(k)+'" data-rid="'+esc(k)+'"><span class="pr-r num">'+esc(r.pt)+' '+esc(r.pl)+r.r+'R</span><span class="pr-t">'+esc(x.tk)+'</span><span class="pr-v">'+(ht===null?'見込み '+x.hit+'%':planLab(ht))+'</span></a>'})}
+    sh.forEach(function(k){var x=PL.races[k],r=C.races[k],ht=planHit(k,x.tk,x.pts);h+='<a class="prow" href="#'+encodeURIComponent(k)+'" data-rid="'+esc(k)+'"><span class="pr-r num">'+esc(r.pt)+' '+esc(r.pl)+r.r+'R</span><span class="pr-t">'+esc(x.tk)+'</span><span class="pr-v">'+(ht===null?(redoOf(k)&&redoOf(k).ph!=null?'当たる確率 '+redoOf(k).ph+'%':'見込み '+x.hit+'%'):planLab(ht))+'</span></a>'})}
   return h+'<div class="note">'+esc(PL.note||"")+'</div></div>';
 }
+function redoOf(rid){return (RD.races&&RD.races[rid])||null}
+/* 11/22 午後 差し替え: オッズを土台に、評価と人気のずれで補正した当たる確率(redo.json、5分ごと) */
+function redoSec(rid){
+  var y=redoOf(rid);if(!y)return "";var x=planOf(rid),ht=x&&x.tk?planHit(rid,x.tk,x.pts):null;
+  var h='<div class="sec"><div class="sh"><h2>作戦(当たる確率)</h2>'+(x?planChip(rid):'')+'</div><div class="plan" style="margin-top:6px">';
+  h+='<div class="note" style="margin-top:0">オッズを土台に、評価と人気のずれで補正した確率(オッズ '+esc(RD.stamp||"")+')。補正の効き目は数%で、ほぼオッズどおり。長い目で見た回収は100円未満。</div>';
+  h+='<div class="hk">勝つ確率の上位</div>';
+  y.top.forEach(function(r){h+='<div class="hr num"><b>'+r.no+' '+esc(r.nm)+'</b> 勝つ '+r.w+'%・3着以内 '+r.t3+'%<br><small>'+r.pop+'番人気('+r.od+'倍)・評価 '+r.erk+'位'+(r.m?'・<b>'+esc(r.m)+'</b>':'')+'</small></div>'});
+  if(y.ext.length)h+='<div class="hr"><small>下位の人気がなさすぎの候補: '+y.ext.map(function(r){return r.no+' '+esc(r.nm)+'('+r.pop+'番人気・評価'+r.erk+'位・3着以内'+r.t3+'%)'}).join('、')+'</small></div>';
+  h+='<div class="hk">当たりやすい買い方(どれか当たる確率)</div>';
+  h+='<div class="hr num">ワイドBOX '+y.box3[0].join('-')+'(3点) <b>'+y.box3[1]+'%</b><br>ワイドBOX '+y.box4[0].join('-')+'(6点) <b>'+y.box4[1]+'%</b><br>三連複BOX '+y.tri5[0].join('-')+'(10点) <b>'+y.tri5[1]+'%</b></div>';
+  h+='<div class="hr num"><small>ワイド1点ずつ: '+y.wides.map(function(w){return w[0]+'-'+w[1]+' '+w[2]+'%'}).join(' / ')+'</small></div>';
+  if(x&&x.tk)h+='<div class="hk">朝の作戦の買い目</div><div class="hr num"><b>'+esc(x.tk)+'</b>(100円×'+x.pts+'点)・当たる確率 <b>'+(y.ph!=null?y.ph+'%':'計算できず')+'</b>'+(ht===null?'':'・'+planLab(ht))+'<br><small>朝に出した見込み('+x.hit+'%)は評価だけで出していて高すぎたため、上の確率に置き換え</small></div>';
+  return h+'</div></div>';
+}
 function planSec(rid){
+  if(redoOf(rid))return redoSec(rid);
   var x=planOf(rid);if(!x)return "";var ht=planHit(rid,x.tk,x.pts);
   var h='<div class="sec"><div class="sh"><h2>作戦</h2>'+planChip(rid)+(x.c==="見送り"?'<span class="pc p3">見送り</span>':'')+'</div><div class="plan" style="margin-top:6px">';
   if(x.tk){h+='<div class="big num">'+esc(x.tk)+'</div><div class="note" style="margin-top:0">100円×'+x.pts+'点・当たる見込み <b>'+x.hit+'%</b>'+(ht===null?'':'・'+planLab(ht))+'</div><div class="note">'+esc(x.cond)+'</div>'}
@@ -295,6 +311,7 @@ function hintSec(rid){
   h+='<div class="hk">② 展開で浮く馬<small style="font-weight:400;color:var(--mut)"> 逃げ '+x.n_nige+'頭・先行 '+x.n_sen+'頭</small></div>';
   if(x.tenkai.length)x.tenkai.forEach(function(t){h+='<div class="hr"><b>'+t.no+' '+esc(t.nm)+'</b> 評価 '+t.rk+'位<br><small>'+esc(t.why)+(t.no!==x.ax?'・ワイド '+x.ax+'-'+t.no+' '+wo(x.ax,t.no):'')+'</small></div>'});
   else h+='<div class="hr"><small>該当なし(逃げ・先行の並びに偏りが無い、または走った記録の少ない馬が多く読めない)</small></div>';
+  if(redoOf(rid)){h+='<div class="note">①②は決まった物差しで出した材料で、過去のレースで当たりやすさを確かめたものではありません。当たる確率は上の「作戦(当たる確率)」を見てください。</div>';return h+'</div></div>';}
   h+='<div class="hk">③ 評価1位 '+x.ax+' '+esc(x.axnm)+' を軸にしたワイド</div>';
   var mk={};x.gap.forEach(function(g){mk[g.no]="①"});x.tenkai.forEach(function(t){mk[t.no]=(mk[t.no]||"")+"②"});
   x.wide.forEach(function(w){h+='<div class="hr num"><b>'+x.ax+'-'+w.no+'</b> '+esc(w.nm)+(mk[w.no]?' <small>'+mk[w.no]+'</small>':'')+'<br><small>当たる見込み <b>'+w.w+'%</b>・相手は評価 '+w.rk+'位・'+wo(x.ax,w.no)+'</small></div>'});
