@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RACE LENS シミュレーション</title>
+<meta name="theme-color" content="#0e1116">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#0e1116;--sf:#161b22;--sf2:#1d232c;--ln:#2a313c;--fg:#e8edf3;--mut:#8b96a5;--acc:#4fd1c5;--up:#3ecf8e;--dn:#ff6b81;--fs:15px}
+@media (prefers-color-scheme:light){:root{--bg:#f6f7f9;--sf:#fff;--sf2:#eef1f5;--ln:#dde2e8;--fg:#141a22;--mut:#5d6876;--acc:#0f9488}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.5 -apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--ln);padding:10px 16px;display:flex;gap:10px;align-items:center;z-index:5}
+header b{font-size:16px}header a{color:var(--acc);text-decoration:none;font-size:13px;margin-left:auto}
+main{max-width:760px;margin:0 auto;padding:8px 16px 40px}
+.note{color:var(--mut);font-size:12.5px;margin:8px 0}
+.tabs{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}.tabs button{background:var(--sf2);color:var(--fg);border:1px solid var(--ln);border-radius:20px;padding:5px 12px;font-size:13px}
+.tabs button.on{background:var(--acc);color:#071a18;border-color:var(--acc);font-weight:700}
+details{background:var(--sf);border:1px solid var(--ln);border-radius:12px;margin:8px 0}
+summary{list-style:none;padding:10px 12px;cursor:pointer}summary::-webkit-details-marker{display:none}
+.rh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.rh .t{font-weight:700}.rh small{color:var(--mut)}
+.top{font-size:13px;color:var(--mut);margin-top:2px}.top b{color:var(--fg)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:6px 6px;border-top:1px solid var(--ln);text-align:right;white-space:nowrap}
+th{color:var(--mut);font-weight:600;font-size:11.5px}td.nm,th.nm{text-align:left;white-space:normal}
+.bar{display:inline-block;height:6px;background:var(--acc);border-radius:3px;vertical-align:middle;margin-left:4px}
+.wrap{overflow-x:auto;padding:0 6px 8px}
+.num{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header><b>シミュレーション</b><span id="day" class="note" style="margin:0"></span><a href="index.html">RACE LENS へ戻る</a></header>
+<main>
+<div class="note">オッズ・人気は使っていません。1頭ずつの力(今の評価・過去走の時計をコースと馬場の速さで補正した数字・終いの脚・前に行く頭数から出る流れ・斤量や間隔)を1つにまとめ、そのレースを1万回走らせた結果です。</div>
+<div id="acc" class="note"></div>
+<div class="tabs" id="tabs"></div>
+<div id="list"></div>
+</main>
+<script>
+var S=null,PL=null;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]})}
+function pt(s){s=String(s||"");return s.length===4?s.slice(0,2)+":"+s.slice(2):s}
+fetch("sim.json?t="+Date.now()).then(function(r){return r.json()}).then(function(j){S=j;
+  document.getElementById("day").textContent=j.day;
+  if(j.check)document.getElementById("acc").innerHTML=j.check;
+  var pls=[];Object.keys(j.races).forEach(function(k){var p=j.races[k].pl;if(pls.indexOf(p)<0)pls.push(p)});PL=pls[0];
+  document.getElementById("tabs").innerHTML=pls.map(function(p){return '<button data-p="'+esc(p)+'">'+esc(p)+'</button>'}).join("");
+  document.getElementById("tabs").onclick=function(e){var b=e.target.closest("button");if(b){PL=b.dataset.p;draw()}};draw();
+}).catch(function(){document.getElementById("list").innerHTML='<div class="note">まだ計算結果がありません。</div>'});
+function draw(){
+  [].forEach.call(document.querySelectorAll(".tabs button"),function(b){b.className=b.dataset.p===PL?"on":""});
+  var ks=Object.keys(S.races).filter(function(k){return S.races[k].pl===PL}).sort(function(a,b){return S.races[a].r-S.races[b].r});
+  document.getElementById("list").innerHTML=ks.map(function(k){var x=S.races[k];
+    var mx=Math.max.apply(null,x.hs.map(function(h){return h.w}))||1;
+    var h='<details><summary><div class="rh"><span class="t num">'+pt(x.pt)+' '+esc(x.pl)+x.r+'R</span><span>'+esc(x.nm)+'</span><small>'+esc(x.surf)+x.dist+'m・'+x.N+'頭</small></div>'
+      +'<div class="top">よく来た上位3頭 <b class="num">'+x.top3.join('-')+'</b>・流れ '+esc(x.pace)+(String(x.pace).indexOf('読めない')===0?'':'(前に行く馬 '+x.front+'頭)')+(x.deb?'・初出走 '+x.deb+'頭(力は仮の数字)':'')+'</div></summary><div class="wrap"><table class="num"><tr><th>馬</th><th class="nm">名前・騎手</th><th>勝つ</th><th>3着以内</th><th>力</th><th>位置</th><th>走数</th></tr>';
+    x.hs.forEach(function(r){h+='<tr><td>'+r.no+'</td><td class="nm">'+esc(r.nm)+'<br><small style="color:var(--mut)">'+esc(r.jk)+'・'+r.wt+'kg</small></td><td>'+r.w+'%<span class="bar" style="width:'+Math.round(40*r.w/mx)+'px"></span></td><td>'+r.t3+'%</td><td>'+(r.mu==null?'—':r.mu)+'</td><td>'+(r.n?(r.early<=0.3?'前':(r.early<=0.6?'中':'後')):'—')+'</td><td>'+r.n+'</td></tr>'});
+    return h+'</table><div class="note">力=過去走で速かった2走の時計を補正した数字(1kmあたり、標準との差の秒。大きいほど速い)。位置=過去走の前半の位置。走数=使った過去走の数(最大6)。</div></div></details>'}).join("");
+}
+</script>
+</body>
+</html>
