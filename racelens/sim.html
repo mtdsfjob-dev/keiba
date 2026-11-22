@@ -25,6 +25,9 @@ th{color:var(--mut);font-weight:600;font-size:11.5px}td.nm,th.nm{text-align:left
 .bar{display:inline-block;height:6px;background:var(--acc);border-radius:3px;vertical-align:middle;margin-left:4px}
 .wrap{overflow-x:auto;padding:0 6px 8px}
 .num{font-variant-numeric:tabular-nums}
+.hit{color:var(--up);font-weight:700}.mis{color:var(--mut)}
+.box{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:8px 10px;margin:8px 0}.box h3{font-size:14px;margin:2px 0 6px}
+td.l,th.l{text-align:left}
 </style>
 </head>
 <body>
@@ -32,20 +35,38 @@ th{color:var(--mut);font-weight:600;font-size:11.5px}td.nm,th.nm{text-align:left
 <main>
 <div class="note">オッズ・人気は使っていません。1頭ずつの力(今の評価・過去走の時計をコースと馬場の速さで補正した数字・終いの脚・前に行く頭数から出る流れ・斤量や間隔)を1つにまとめ、そのレースを1万回走らせた結果です。</div>
 <div id="acc" class="note"></div>
+<div id="cmp"></div>
 <div class="tabs" id="tabs"></div>
 <div id="list"></div>
 </main>
 <script>
-var S=null,PL=null;
+var S=null,PL=null,RD={},RS={};
+var MT=[["wd","シミュレーション"],["wde","今の評価だけ"],["rd","メイン画面の作戦"]];
+function gj(u){return fetch(u+"?t="+Date.now()).then(function(r){return r.json()}).catch(function(){return {}})}
+function pairs(k,m){var x=S.races[k];if(m==="rd"){var r=RD[k];return r&&r.wides?r.wides.slice(0,5):[]}return x[m]||[]}
+function t3(k){var r=RS[k];if(!r||!r.order||!r.order.length)return null;return r.order.filter(function(o){return o[0]<=3}).map(function(o){return o[1]})}
+function mk(k,p){var t=t3(k);if(!t)return "";return t.indexOf(p[0])>=0&&t.indexOf(p[1])>=0?'<span class="hit">当たり</span>':'<span class="mis">外れ</span>'}
+function pc(p){return '<b>'+p[0]+'-'+p[1]+'</b> '+p[2]+'%'}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]})}
 function pt(s){s=String(s||"");return s.length===4?s.slice(0,2)+":"+s.slice(2):s}
-fetch("sim.json?t="+Date.now()).then(function(r){return r.json()}).then(function(j){S=j;
+Promise.all([gj("sim.json"),gj("redo.json"),gj("results.json")]).then(function(a){var j=a[0];if(!j.races)throw 0;S=j;RD=a[1].races||{};RS=a[2].races||{};
   document.getElementById("day").textContent=j.day;
   if(j.check)document.getElementById("acc").innerHTML=j.check;
   var pls=[];Object.keys(j.races).forEach(function(k){var p=j.races[k].pl;if(pls.indexOf(p)<0)pls.push(p)});PL=pls[0];
   document.getElementById("tabs").innerHTML=pls.map(function(p){return '<button data-p="'+esc(p)+'">'+esc(p)+'</button>'}).join("");
-  document.getElementById("tabs").onclick=function(e){var b=e.target.closest("button");if(b){PL=b.dataset.p;draw()}};draw();
+  document.getElementById("tabs").onclick=function(e){var b=e.target.closest("button");if(b){PL=b.dataset.p;draw()}};cmp();draw();
 }).catch(function(){document.getElementById("list").innerHTML='<div class="note">まだ計算結果がありません。</div>'});
+function cmp(){
+  var ks=Object.keys(S.races),done=ks.filter(function(k){return t3(k)});
+  var h='<div class="box"><h3>ワイドの比べ(終わったレース '+done.length+' / '+ks.length+')</h3><div style="overflow-x:auto"><table class="num"><tr><th class="l">予想</th><th>1位の組<br>当たり</th><th>見込み</th><th>上位5組の<br>どれか当たり</th></tr>';
+  MT.forEach(function(m){var a=0,e=0,b=0;done.forEach(function(k){var ps=pairs(k,m[0]),t=t3(k);if(!ps.length)return;var f=function(p){return t.indexOf(p[0])>=0&&t.indexOf(p[1])>=0};if(f(ps[0]))a++;e+=ps[0][2]/100;if(ps.some(f))b++});
+    h+='<tr><td class="l">'+m[1]+'</td><td>'+a+'</td><td>'+e.toFixed(1)+'</td><td>'+b+'</td></tr>'});
+  h+='</table></div><div class="note">1位の組 = その予想でいちばん当たる確率が高いワイド。見込み = 1位の組の当たる確率を足したもの(この数より多く当たれば、その予想は見込みより良かった)。メイン画面の作戦はオッズを土台にした計算、ほかの2つはオッズを使っていません。</div></div>';
+  var rk=ks.filter(function(k){return (S.races[k].wd||[]).length}).sort(function(a,b){return S.races[b].wd[0][2]-S.races[a].wd[0][2]});
+  h+='<details class="box" style="padding:0" open><summary><h3 style="margin:0">ワイドの当たる確率が高い順(シミュレーション、各レースの1位の組)</h3></summary><div class="wrap"><table class="num"><tr><th class="l">レース</th><th class="l">組</th><th>当たる確率</th><th>結果</th></tr>';
+  rk.forEach(function(k){var x=S.races[k],p=x.wd[0];h+='<tr><td class="l">'+pt(x.pt)+' '+esc(x.pl)+x.r+'R</td><td class="l"><b>'+p[0]+'-'+p[1]+'</b></td><td>'+p[2]+'%</td><td>'+(mk(k,p)||'—')+'</td></tr>'});
+  document.getElementById("cmp").innerHTML=h+'</table><div class="note">払い戻しの額はオッズを使わないため出していません。</div></div></details>';
+}
 function draw(){
   [].forEach.call(document.querySelectorAll(".tabs button"),function(b){b.className=b.dataset.p===PL?"on":""});
   var ks=Object.keys(S.races).filter(function(k){return S.races[k].pl===PL}).sort(function(a,b){return S.races[a].r-S.races[b].r});
@@ -54,7 +75,9 @@ function draw(){
     var h='<details><summary><div class="rh"><span class="t num">'+pt(x.pt)+' '+esc(x.pl)+x.r+'R</span><span>'+esc(x.nm)+'</span><small>'+esc(x.surf)+x.dist+'m・'+x.N+'頭</small></div>'
       +'<div class="top">よく来た上位3頭 <b class="num">'+x.top3.join('-')+'</b>・流れ '+esc(x.pace)+(String(x.pace).indexOf('読めない')===0?'':'(前に行く馬 '+x.front+'頭)')+(x.deb?'・初出走 '+x.deb+'頭(力は仮の数字)':'')+'</div></summary><div class="wrap"><table class="num"><tr><th>馬</th><th class="nm">名前・騎手</th><th>勝つ</th><th>3着以内</th><th>力</th><th>位置</th><th>走数</th></tr>';
     x.hs.forEach(function(r){h+='<tr><td>'+r.no+'</td><td class="nm">'+esc(r.nm)+'<br><small style="color:var(--mut)">'+esc(r.jk)+'・'+r.wt+'kg</small></td><td>'+r.w+'%<span class="bar" style="width:'+Math.round(40*r.w/mx)+'px"></span></td><td>'+r.t3+'%</td><td>'+(r.mu==null?'—':r.mu)+'</td><td>'+(r.n?(r.early<=0.3?'前':(r.early<=0.6?'中':'後')):'—')+'</td><td>'+r.n+'</td></tr>'});
-    return h+'</table><div class="note">力=過去走で速かった2走の時計を補正した数字(1kmあたり、標準との差の秒。大きいほど速い)。位置=過去走の前半の位置。走数=使った過去走の数(最大6)。</div></div></details>'}).join("");
+    h+='</table><table class="num" style="margin-top:8px"><tr><th>順</th>'+MT.map(function(m){return '<th class="l">'+m[1]+'</th>'}).join('')+'</tr>';
+    for(var i=0;i<5;i++){h+='<tr><td>'+(i+1)+'</td>'+MT.map(function(m){var p=pairs(k,m[0])[i];return '<td class="l">'+(p?pc(p)+' '+mk(k,p):'—')+'</td>'}).join('')+'</tr>'}
+    return h+'</table><div class="note">下の表 = ワイドの当たる確率が高い組を3つの予想で並べたもの。力=過去走で速かった2走の時計を補正した数字(1kmあたり、標準との差の秒。大きいほど速い)。位置=過去走の前半の位置。走数=使った過去走の数(最大6)。</div></div></details>'}).join("");
 }
 </script>
 </body>
