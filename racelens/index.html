@@ -66,6 +66,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .pc.p1{color:#04140d;background:var(--up)}.pc.p2{color:#1a1204;background:var(--myo)}.pc.p3{color:var(--mut);border:1px solid var(--ln)}
 .plan{border:1px solid var(--ln);border-radius:14px;padding:12px 14px;margin:12px 0 4px;background:var(--card,transparent)}
 .plan h3{margin:0 0 6px;font-size:14px}
+.hk{font-weight:800;font-size:13px;margin:12px 0 4px}.hk:first-child{margin-top:0}.hr{font-size:13px;padding:4px 0;border-top:1px solid var(--ln);line-height:1.5}.hr small{color:var(--mut)}
 .plan .prow{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:1px;padding:8px 0;border-top:1px solid var(--ln);text-decoration:none;color:inherit}
 .plan .prow:first-of-type{border-top:0}.plan .prow .pr-r{font-weight:700;white-space:nowrap}.plan .prow .pr-t{font-weight:800;white-space:nowrap}
 .plan .prow .pr-v{grid-column:1/3;font-size:12px;color:var(--mut)}
@@ -200,7 +201,7 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 <nav class="nav" id="nav"><button data-nav="race" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>レース</button><button data-nav="rec"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>記録</button></nav>
 <script>
 "use strict";
-var C=null,OD={},PR={},RS={},PL={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
+var C=null,OD={},OC={},HN={},PR={},RS={},PL={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
 var KC={"固い":"hard","ふつう":"mid","荒れ":"wild"};
 var GW={"S":0};
 function $(s){return document.querySelector(s)}
@@ -210,7 +211,7 @@ function today(){var t=new Date();return t.getFullYear()+"-"+String(t.getMonth()
 function nowHM(){var t=new Date();return String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")}
 function get(u){return fetch(u+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():{}}).catch(function(){return {}})}
 function load(first){
-  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json"),get("plan.json")]).then(function(a){PL=a[4]||{};
+  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json"),get("plan.json"),get("hint.json")]).then(function(a){PL=a[4]||{};HN=a[5]||{};OC=(a[1]&&a[1].combo)||{};
     if(first)C=a[0];OD=(a[1]&&a[1].races)||{};PR=(a[2]&&a[2].races)||{};RS=(a[3]&&(a[3].races||a[3]))||{};
     var st=a[1]&&a[1].stamp?"オッズ "+String(a[1].stamp).replace(/^\d+\/\d+\s*/,"")+" 時点":"オッズ発売前";$("#st").textContent=st;
     if(!S.day){var td=today();S.day=C.days.indexOf(td)>=0?td:C.days[C.days.length-1];for(var i=0;i<C.days.length;i++){if(C.days[i]>=td){S.day=C.days[i];break}}}
@@ -280,6 +281,24 @@ function planSec(rid){
   h+='<div class="why">'+esc(x.why)+'</div>';
   if(x.tk)h+='<div class="note">ここの見込みは、過去(2023〜2026年)に実際に当たった割合に合わせて補正した数字です。下の「推奨の買い目」の「このレース」は補正前の数字なので、少し高く出ます。</div>';
   if(x.alt)h+='<div class="note">別の手: <b>'+esc(x.alt.tk)+'</b>(100円×'+x.alt.pts+'点)・当たる見込み '+x.alt.hit+'%。'+esc(x.alt.cond)+'</div>';
+  return h+'</div></div>';
+}
+/* 11/22 穴の候補(発走前。hint.json)。評価そのものは変えず、決まった物差しで材料を出す */
+function hintSec(rid){
+  var x=(HN.races||{})[rid];if(!x)return "";
+  var W=(OC[rid]||{})["ワイド"]||{};
+  function wo(a,b){var v=W[Math.min(a,b)+"-"+Math.max(a,b)];return v?v[0]+"〜"+v[1]+"倍":"倍率は発売後"}
+  var h='<div class="sec"><div class="sh"><h2>穴の候補(発走前)</h2></div><div class="plan" style="margin-top:6px">';
+  h+='<div class="hk">① レーティング上位なのに評価が低い馬</div>';
+  if(x.gap.length)x.gap.forEach(function(g){h+='<div class="hr"><b>'+g.no+' '+esc(g.nm)+'</b> 評価 '+g.rk+'位・馬と騎手のレーティング '+g.trk+'位<br><small>ワイド '+x.ax+'-'+g.no+' '+wo(x.ax,g.no)+'</small></div>'});
+  else h+='<div class="hr"><small>該当なし(レーティング3位以内で評価5位以下の馬はいない)</small></div>';
+  h+='<div class="hk">② 展開で浮く馬<small style="font-weight:400;color:var(--mut)"> 逃げ '+x.n_nige+'頭・先行 '+x.n_sen+'頭</small></div>';
+  if(x.tenkai.length)x.tenkai.forEach(function(t){h+='<div class="hr"><b>'+t.no+' '+esc(t.nm)+'</b> 評価 '+t.rk+'位<br><small>'+esc(t.why)+(t.no!==x.ax?'・ワイド '+x.ax+'-'+t.no+' '+wo(x.ax,t.no):'')+'</small></div>'});
+  else h+='<div class="hr"><small>該当なし(逃げ・先行の並びに偏りが無い、または走った記録の少ない馬が多く読めない)</small></div>';
+  h+='<div class="hk">③ 評価1位 '+x.ax+' '+esc(x.axnm)+' を軸にしたワイド</div>';
+  var mk={};x.gap.forEach(function(g){mk[g.no]="①"});x.tenkai.forEach(function(t){mk[t.no]=(mk[t.no]||"")+"②"});
+  x.wide.forEach(function(w){h+='<div class="hr num"><b>'+x.ax+'-'+w.no+'</b> '+esc(w.nm)+(mk[w.no]?' <small>'+mk[w.no]+'</small>':'')+'<br><small>当たる見込み <b>'+w.w+'%</b>・相手は評価 '+w.rk+'位・'+wo(x.ax,w.no)+'</small></div>'});
+  h+='<div class="note">①②は決まった物差しで出した材料で、過去のレースで当たりやすさを確かめたものではありません。③の見込みは評価から計算し、作戦と同じく過去に実際に当たった割合で補正した数字(ワイドは0.81倍)。評価そのものは変えていません。</div>';
   return h+'</div></div>';
 }
 function listView(){
@@ -413,6 +432,7 @@ function raceView(rid){
     +(p.c5!=null?'<div class="note">性格は単勝オッズで決めています。人気どおりなら上位5組の三連複で決まる見込みが '+Math.round(p.c5*100)+'%(固い=56%以上、荒れ=28%未満)。</div>':'')+'</div>';
   h+=result(rid);
   h+=planSec(rid);
+  h+=hintSec(rid);
   h+='<div class="sec"><div class="sh"><h2>推奨の買い目</h2><small>金額はご自身で</small></div>'+(PR[rid]||F.hasO?myo(rid)+hon(rid,F):hon(rid,F)+'<div class="note">妙味の買い目は、当日のオッズが出てから表示します。</div>')+'</div>';
   h+=horses(rid,F);
   $("#main").innerHTML=h;
