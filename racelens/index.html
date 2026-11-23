@@ -57,7 +57,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .res i{font-style:normal;color:var(--dim);font-weight:400;margin-right:4px;font-size:11px}
 .gr{font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;background:var(--myo);color:#1a1204;flex:none}
 .k{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:700;border:1px solid currentColor;flex:none}
-.k.hard{color:var(--k-hard)}.k.mid{color:var(--k-mid)}.k.wild{color:var(--k-wild)}.k.none{color:var(--dim)}
+.k.clu{color:var(--fg,#e8edf3);border-color:var(--dim)}.ctab{width:100%;border-collapse:collapse;font-size:12.5px}.ctab th,.ctab td{padding:5px 6px;border-top:1px solid var(--line,#2a313c);text-align:right;white-space:nowrap}.ctab .l{text-align:left;white-space:normal}.k.hard{color:var(--k-hard)}.k.mid{color:var(--k-mid)}.k.wild{color:var(--k-wild)}.k.none{color:var(--dim)}
 .tag{flex:none;font-size:11px;color:var(--fg);background:var(--sf2);border-radius:4px;padding:1px 6px}
 .badge{font-size:11px;font-weight:800;padding:2px 7px;border-radius:10px;flex:none}
 .badge.myo{color:#1a1204;background:var(--myo)}
@@ -201,7 +201,7 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 <nav class="nav" id="nav"><button data-nav="race" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>レース</button><button data-nav="rec"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>記録</button></nav>
 <script>
 "use strict";
-var C=null,OD={},OC={},HN={},RD={},PR={},RS={},PL={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
+var C=null,CL={},OD={},OC={},HN={},RD={},PR={},RS={},PL={},S={day:null,pl:"all",rid:null,sort:"ev",open:{}};
 var KC={"固い":"hard","ふつう":"mid","荒れ":"wild"};
 var GW={"S":0};
 function $(s){return document.querySelector(s)}
@@ -211,7 +211,7 @@ function today(){var t=new Date();return t.getFullYear()+"-"+String(t.getMonth()
 function nowHM(){var t=new Date();return String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")}
 function get(u){return fetch(u+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():{}}).catch(function(){return {}})}
 function load(first){
-  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json"),get("plan.json"),get("hint.json"),get("redo.json")]).then(function(a){PL=a[4]||{};HN=a[5]||{};RD=a[6]||{};OC=(a[1]&&a[1].combo)||{};
+  return Promise.all([first?get("cards.json"):Promise.resolve(C),get("odds.json"),get("pl_rec.json"),get("results.json"),get("plan.json"),get("hint.json"),get("redo.json"),get("clu.json")]).then(function(a){CL=(a[7]&&a[7].races)||{};PL=a[4]||{};HN=a[5]||{};RD=a[6]||{};OC=(a[1]&&a[1].combo)||{};
     if(first)C=a[0];OD=(a[1]&&a[1].races)||{};PR=(a[2]&&a[2].races)||{};RS=(a[3]&&(a[3].races||a[3]))||{};
     var st=a[1]&&a[1].stamp?"オッズ "+String(a[1].stamp).replace(/^\d+\/\d+\s*/,"")+" 時点":"オッズ発売前";$("#st").textContent=st;
     if(!S.day){var td=today();S.day=C.days.indexOf(td)>=0?td:C.days[C.days.length-1];for(var i=0;i<C.days.length;i++){if(C.days[i]>=td){S.day=C.days[i];break}}}
@@ -239,6 +239,15 @@ function feats(rid,F){
   if(p.ana&&p.ana.length)t.push("人気薄に高い評価");
   return t;
 }
+function cluChip(rid){var c=CL[rid];if(!c)return "";var h="";
+  if(c.rpt!=null&&c.rpt!=="")h+='<span class="k clu">RPT '+esc(c.rpt)+'</span>';
+  if(c.rs!=null)h+='<span class="k clu">RS '+c.rs+'</span>';return h}
+function cluSec(rid,F){var c=CL[rid];if(!c||!c.hs)return "";
+  var rows=F.hs.map(function(x){var y=c.hs[String(x.h.no)]||{};return {x:x,y:y}}).filter(function(o){return o.x.live});
+  rows.sort(function(a,b){return (a.y.cr||99)-(b.y.cr||99)});
+  var h='<div class="sec"><div class="sh"><h2>クラスターの指標</h2><small>C人気の順</small></div><div style="overflow-x:auto"><table class="ctab num"><tr><th>馬</th><th class="l">名前</th><th>C人気</th><th>C</th><th>BB</th><th>BB順</th><th>能力</th><th>総合</th></tr>';
+  rows.forEach(function(o){var y=o.y;h+='<tr><td>'+o.x.h.no+'</td><td class="l">'+esc(o.x.h.nm||"")+'</td><td>'+(y.cr==null?'—':y.cr)+'</td><td>'+(y.c==null?'—':y.c)+'</td><td>'+(y.bb==null?'—':y.bb)+'</td><td>'+(y.bbr==null?'—':y.bbr)+'</td><td>'+esc(y.nr||'—')+'</td><td>'+esc(y.sg||'—')+'</td></tr>'});
+  return h+'</table></div><div class="note">RPT=クラスターの荒れ度(小さいほど荒れやすい。1〜3 荒れ、4〜6 中間、7〜9 やや順当、10以上 順当寄り)。RS=こちらで作った固さの予想(1 荒れる〜10 固い。人気・オッズは使わない)。C人気=クラスター独自の人気順。BB=BBスコア。</div></div>'}
 function kindChip(k){return k?'<span class="k '+KC[k]+'">'+esc(k)+'</span>':'<span class="k none">性格は当日</span>'}
 function head(){
   var b=$("#days"),h="";
@@ -330,7 +339,7 @@ function listView(){
     h+='<li class="row'+(done?" done":"")+'" data-rid="'+esc(rid)+'">'
       +'<span class="t num">'+esc(r.pt)+'<small>'+esc(r.surf)+r.dist+'</small><small>'+F.live.length+'頭</small></span>'
       +'<div class="m"><div class="l1"><span class="vr">'+esc(r.pl)+r.r+'R</span>'+(r.gr?'<span class="gr">'+r.gr+'</span>':"")+'<span class="nm">'+esc(r.name||r.cls)+'</span></div>'
-      +'<div class="l2">'+planChip(rid)+kindChip(k)+tg+'</div></div>'
+      +'<div class="l2">'+planChip(rid)+cluChip(rid)+kindChip(k)+tg+'</div></div>'
       +'<div class="rt">'+right+'</div></li>';
   });
   var sum='<div class="sum"><span>全<b>'+arr.length+'</b>レース</span><span>固い <b>'+nk["固い"]+'</b>・ふつう <b>'+nk["ふつう"]+'</b>・荒れ <b>'+nk["荒れ"]+'</b></span><span>妙味のあるレース <b>'+nmy+'</b></span></div>';
@@ -445,12 +454,13 @@ function raceView(rid){
   var tg=feats(rid,F).map(function(x){return '<span class="tag">'+esc(x)+'</span>'}).join("");
   var h='<div class="rh"><div class="ttl"><h1>'+esc(r.pl)+r.r+'R '+esc(r.name||r.cls)+'</h1>'+(r.gr?'<span class="gr">'+r.gr+'</span>':"")+'</div>'
     +'<div class="meta num">'+esc(dlabel(r.day))+' '+esc(r.pt)+'発走・'+esc(r.surf)+r.dist+'m'+(r.course?'('+esc(r.course)+')':'')+'・'+F.live.length+'頭'+(r.name?'・'+esc(r.cls):'')+'</div>'
-    +'<div class="tags">'+kindChip(k)+tg+'</div>'
+    +'<div class="tags">'+cluChip(rid)+kindChip(k)+tg+'</div>'
     +(p.c5!=null?'<div class="note">性格は単勝オッズで決めています。人気どおりなら上位5組の三連複で決まる見込みが '+Math.round(p.c5*100)+'%(固い=56%以上、荒れ=28%未満)。</div>':'')+'</div>';
   h+=result(rid);
   h+=planSec(rid);
   h+=hintSec(rid);
   h+='<div class="sec"><div class="sh"><h2>推奨の買い目</h2><small>金額はご自身で</small></div>'+(PR[rid]||F.hasO?myo(rid)+hon(rid,F):hon(rid,F)+'<div class="note">妙味の買い目は、当日のオッズが出てから表示します。</div>')+'</div>';
+  h+=cluSec(rid,F);
   h+=horses(rid,F);
   $("#main").innerHTML=h;
 }
