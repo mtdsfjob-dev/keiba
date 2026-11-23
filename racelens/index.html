@@ -245,9 +245,9 @@ function cluChip(rid){var c=CL[rid];if(!c)return "";var h="";
 function cluSec(rid,F){var c=CL[rid];if(!c||!c.hs)return "";
   var rows=F.hs.map(function(x){var y=c.hs[String(x.h.no)]||{};return {x:x,y:y}}).filter(function(o){return o.x.live});
   rows.sort(function(a,b){return (a.y.cr||99)-(b.y.cr||99)});
-  var h='<div class="sec"><div class="sh"><h2>クラスターの指標</h2><small>C人気の順</small></div><div style="overflow-x:auto"><table class="ctab num"><tr><th>馬</th><th class="l">名前</th><th>C人気</th><th>C</th><th>BB</th><th>BB順</th><th>能力</th><th>総合</th></tr>';
-  rows.forEach(function(o){var y=o.y;h+='<tr><td>'+o.x.h.no+'</td><td class="l">'+esc(o.x.h.nm||"")+'</td><td>'+(y.cr==null?'—':y.cr)+'</td><td>'+(y.c==null?'—':y.c)+'</td><td>'+(y.bb==null?'—':y.bb)+'</td><td>'+(y.bbr==null?'—':y.bbr)+'</td><td>'+esc(y.nr||'—')+'</td><td>'+esc(y.sg||'—')+'</td></tr>'});
-  return h+'</table></div><div class="note">RPT=クラスターの荒れ度(小さいほど荒れやすい。1〜3 荒れ、4〜6 中間、7〜9 やや順当、10以上 順当寄り)。RS=こちらで作った固さの予想(1 荒れる〜10 固い。人気・オッズは使わない)。C人気=クラスター独自の人気順。BB=BBスコア。</div></div>'}
+  var h='<div class="sec"><div class="sh"><h2>クラスターの指標</h2><small>C人気の順</small></div><div style="overflow-x:auto"><table class="ctab num"><tr><th>馬</th><th class="l">名前</th><th>C人気</th><th>C</th><th>BB</th><th>BB順</th><th>能力</th><th>総合</th><th>勝つ</th><th>3着内</th></tr>';
+  rows.forEach(function(o){var y=o.y;h+='<tr><td>'+o.x.h.no+'</td><td class="l">'+esc(o.x.h.nm||"")+'</td><td>'+(y.cr==null?'—':y.cr)+'</td><td>'+(y.c==null?'—':y.c)+'</td><td>'+(y.bb==null?'—':y.bb)+'</td><td>'+(y.bbr==null?'—':y.bbr)+'</td><td>'+esc(y.nr||'—')+'</td><td>'+esc(y.sg||'—')+'</td><td>'+(y.pw==null?'—':y.pw+'%')+'</td><td>'+(y.p3==null?'—':y.p3+'%')+'</td></tr>'});
+  return h+'</table></div><div class="note">RPT=クラスターの荒れ度(小さいほど荒れやすい。1〜3 荒れ、4〜6 中間、7〜9 やや順当、10以上 順当寄り)。RS=こちらで作った固さの予想(1 荒れる〜10 固い。人気・オッズは使わない)。C人気=クラスター独自の人気順。BB=BBスコア。勝つ・3着内=クラスター込みの確率(オッズにC・BB・能力・総合とRPTを足した計算。オッズだけの場合と当たる精度はほぼ同じ)。</div></div>'}
 function kindChip(k){return k?'<span class="k '+KC[k]+'">'+esc(k)+'</span>':'<span class="k none">性格は当日</span>'}
 function head(){
   var b=$("#days"),h="";
